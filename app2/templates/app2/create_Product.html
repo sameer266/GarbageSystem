@@ -1,0 +1,156 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %} 
+{% if instance %}Edit Product{% else %}Add Product{% endif %}
+{% endblock %}
+{% block body %}
+
+<style>
+    #id_rate,#id_product_name , #id_price,#id_location,#id_isInstock,#id_rating,#id_vendor,#id_category{
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }</style>
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="content-page">
+    <div class="content">
+
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <!-- start page title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <h4 class="page-title">{% if instance %}Edit Product{% else %}Add Product{% endif %}</h4>
+                    </div>
+                </div>
+            </div>
+            <!-- end page title -->
+                      
+            <form method="post" enctype="multipart/form-data" action="{% if instance %}{% url 'dashboard:edit_Product' instance.id %}{% else %}{% url 'dashboard:add_Product' %}{% endif %}">
+                {% csrf_token %}
+                {% if messages %}
+                {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-xl-6">
+                                        <!-- Product Name -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.product_name.id_for_label }}" class="form-label">Product Name</label>
+                                            <input type="text" name="{{ form.product_name.name }}" id="{{ form.product_name.id_for_label }}" class="form-control" required value="{% if instance %}{{ instance.product_name }}{% endif %}" placeholder="Enter product name">
+                                        </div>
+                                        <!-- Category -->
+                                    
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Category</label>
+                                                {{ form.category }}
+                                            </div>
+                                            <div class="mb-3">
+
+                                            <div id="subcategory-div">
+                                                <label for="subcategory">Subcategory:</label>
+                                                <select name="sub_category" id="subcategory">
+                                                    <option value="">---------</option>
+                                                </select>
+                                            </div>
+                                            </div> 
+                                        <!-- Rate -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.rate.id_for_label }}" class="form-label">Rate</label>
+                                            {{ form.rate }}
+                                        </div>
+                                    </div>
+                                        <div class="col-xl-6">
+
+                                        <!-- Unit -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.unit.id_for_label }}" class="form-label">Unit</label>
+                                            {{ form.unit }}
+                                        </div>
+                                        <!-- Product Image -->
+                                        <div class="mb-3 mt-3 mt-xl-0">
+                                            <label for="{{ form.product_image.id_for_label }}" class="form-label">Image:</label>
+                                            <input type="file" name="{{ form.product_image.name }}" id="{{ form.product_image.id_for_label }}" class="img-fluid form-control custom-class" {% if not instance %}required{% endif %} onchange="showPreview(this);">
+                                            <div id="imageContainer" style="width:auto">
+                                                <img id="imagePreview" class="img-fluid" src="{% if instance %}{{ instance.product_image.url }}{% endif %}" alt="">
+                                            </div>
+                                        </div>
+                                        <br><br>
+                                    </div>
+                                      
+                <div class="col-auto">
+                    <a href="{% url 'dashboard:Product' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
+                    {% if instance %}
+                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Update </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Save</button>
+                    {% endif %}
+                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+              
+                <br><br><br><br><br><br><br><br><br><br>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Parse the subcategories JSON data passed from the view
+    var subcategoriesData = JSON.parse('{{ subcategories_json|escapejs }}');
+
+    // Function to update the subcategory dropdown based on the selected category
+    function updateSubcategories() {
+        var categorySelect = document.getElementById('id_category');
+        var subcategorySelect = document.getElementById('subcategory');
+
+        var categoryId = categorySelect.value;
+        subcategorySelect.innerHTML = ''; // Clear the existing options
+
+        // Add the options for the selected category
+        if (categoryId in subcategoriesData) {
+            subcategoriesData[categoryId].forEach(function(option) {
+                var opt = document.createElement('option');
+                opt.value = option[0];
+                opt.innerHTML = option[1];
+                subcategorySelect.appendChild(opt);
+            });
+        } else {
+            var opt = document.createElement('option');
+            opt.value = '';
+            opt.innerHTML = '---------';
+            subcategorySelect.appendChild(opt);
+        }
+    }
+
+    // Call the function initially to populate subcategories based on the initial category value
+    updateSubcategories();
+
+    // Add event listener to update subcategories whenever the category selection changes
+    document.getElementById('id_category').addEventListener('change', updateSubcategories);
+</script>
+    
+{% endblock %}

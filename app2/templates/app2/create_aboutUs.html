@@ -1,0 +1,117 @@
+
+
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %} 
+{% if instance %}Edit AboutUs{% else %}Add AboutUs{% endif %}
+{% endblock %}
+{% block body %}
+
+            <!-- ============================================================== -->
+            <!-- Start Page Content here -->
+            <!-- ============================================================== -->
+
+            <div class="content-page">
+                <div class="content">
+
+                    <!-- Start Content-->
+                    <div class="container-fluid">
+
+                        <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box">
+                               
+                                    <h4 class="page-title">{% if instance %}Edit AboutUs{% else %}Add AboutUs{% endif %}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end page title -->
+                      
+                        <form method="post" enctype="multipart/form-data" action="{% if instance %}{% url 'dashboard:AboutUs'  %}{% else %}{% url 'dashboard:AboutUs' %}{% endif %}">
+                            {% csrf_token %}
+                                {% if messages %}
+                                {% for msg in messages %}
+                                    <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+
+                                        <div class="row">
+
+                                            <div class="col-xl-6">
+
+                                                     <!-- Date View -->
+                                                     <div class="mb-3">
+                                                        <label for="{{ form.company_name.id_for_label }}" class="form-label">Company Name</label>
+                                                        <input type="text" name=" {{ form.company_name.name }}  " id="{{ form.company_name.id_for_label }}" class="form-control" required
+                                                               value="{% if instance %}{{ instance.company_name }}{% endif %}" placeholder="Enter company_name">
+                                                    </div>
+
+
+                                                
+                                                    <div class="mb-3">
+                                                        <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                                                        <input type="text" name=" {{ form.address.name }}  " id="{{ form.address.id_for_label }}" class="form-control" required
+                                                               value="{% if instance %}{{ instance.address }}{% endif %}" placeholder="Enter address">
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                                        <input type="email" name=" {{ form.email.name }}  " id="{{ form.email.id_for_label }}" class="form-control" required
+                                                               value="{% if instance %}{{ instance.email }}{% endif %}" placeholder="Enter email">
+                                                    </div>
+                                                </div>
+                                                    <div class="col-xl-6">
+
+                                                    <div class="mb-3">
+                                                        <label for="{{ form.contactNo.id_for_label }}" class="form-label">ContactNo:</label>
+                                                        <input type="tel" name=" {{ form.contactNo.name }}  " id="{{ form.contactNo.id_for_label }}" class="form-control" required
+                                                               value="{% if instance %}{{ instance.contactNo }}{% endif %}" placeholder="Enter contactNo">
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 mt-3 mt-xl-0 " >
+                                                        <label for="{{ form.logo.id_for_label }}" class="form-label">image:</label>
+                                                        <input type="file" name="{{ form.logo.name }}" id="{{ form.logo.id_for_label }}" class=" img-fluid form-control custom-class" {% if not instance %}required{% endif %} onchange="showPreview(this);">
+                                                        <div id="imageContainer" style="width:auto">
+                                                            <img id="imagePreview" class="img-fluid" src="{% if instance %}{{ instance.logo.url }}{% endif %}" alt="">
+                                                        </div>
+                                                    </div>
+                                              <br><br>                                               
+                                                </div>
+                                           
+                                            </div> <!-- end col-->
+                                        
+                                            <div class="col-auto">
+                                                <a href="{% url 'dashboard:AboutUs' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
+
+                                                {% comment %} <a href="{% url 'training_category' %}" class="btn btn-danger"><i class=""></i>Back to Table</a> {% endcomment %}
+                                                {% if instance %}
+                                                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Update </button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Save</button>
+                                                {% endif %}
+                                            </div>
+                                            <br>  <br>  <br>  <br>  <br>  <br>  <br>  <br><br>
+                                        </div>
+                                        <!-- end row -->
+
+                                </div> <!-- end card-->
+                            </div> <!-- end col-->
+                        </div>
+                        <!-- end row-->
+                    </form>
+
+                    </div> <!-- container -->
+
+                </div> <!-- content -->
+
+
+       {%endblock%}
