@@ -16,7 +16,7 @@ class AdvertisementListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-''' bannar views'''
+''' bannar dssddviews'''
 class BannerListView(generics.ListAPIView):
     queryset = Banner.objects.all()
     serializer_class = BannerSerializer
