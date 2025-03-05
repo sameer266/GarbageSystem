@@ -68,7 +68,7 @@ SITE_ID = 1
 #REST_FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',  # Enables session-based authentication
+        
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Enables JWT authentication
     ),
 }

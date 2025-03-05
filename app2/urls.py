@@ -140,6 +140,10 @@ urlpatterns = [
         path('rewards', views.rewards_create_or_update, name='rewards_create_or_update'),
         path('order/history/<int:id>',views.user_order_history, name='user_order_history'),
         path('reward/update/<int:id>',views.user_reward_update, name='user_reward_update'),
+        
+        # ==== notofication =======
+        path('notification_list',views.notification_list,name="notification_list"),
+        
 
 
         re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),

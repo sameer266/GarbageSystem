@@ -476,13 +476,13 @@
     <a data-bs-toggle="collapse" href="#sidebarPages1" aria-expanded="false" aria-controls="sidebarPages1" class="side-nav-link">
         <i class="uil-bell"></i> <!-- Notification Icon -->
         <span> Notification </span>
-        <span class="badge bg-danger ms-2" id="notification-count">3</span> <!-- Notification Badge -->
+       
         <span class="menu-arrow"></span>
     </a>
     <div class="collapse" id="sidebarPages1">
         <ul class="side-nav-second-level">
             <li>
-                <a href="{% url 'dashboard:rewards_create_or_update' %}">User Reward Points</a>
+                <a href="{% url 'dashboard:notification_list' %}">Notifications</a>
             </li>
         </ul>
     </div>

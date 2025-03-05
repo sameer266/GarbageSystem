@@ -39,6 +39,11 @@ class Notification(models.Model):
         return f"Notifications of {self.user.name} - {self.message}"
 
 
+from django.db import models
+from django.utils.timezone import now
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 class Order(models.Model):
     PAYMENT_CHOICES = [('cod', 'Cash on Delivery')]
     ORDER_STATUS_CHOICES = [
@@ -56,7 +61,7 @@ class Order(models.Model):
     updated = models.DateTimeField(auto_now=True)
     driver = models.ForeignKey(User, on_delete=models.SET_NULL, limit_choices_to={'is_agent': True}, null=True, blank=True)
     address = models.ForeignKey(RequestAddress, on_delete=models.SET_NULL, null=True, blank=True, related_name='order_address')
-    order_status_changed = models.BooleanField(default=False)  # Track order status changes
+    order_status_changed = models.DateTimeField(null=True, blank=True)  # Track order status change time
 
     def __str__(self):
         return f"Order {self.id} - {self.user}"
@@ -69,7 +74,7 @@ class Order(models.Model):
             for item in self.items.all():
                 stock, created = Stock.objects.get_or_create(
                     product=item.product,
-                    defaults={'quantity': item.quantity, 'date_created': timezone.now()}
+                    defaults={'quantity': item.quantity, 'date_created': now()}
                 )
                 if not created:
                     stock.quantity += item.quantity
@@ -97,20 +102,27 @@ class Order(models.Model):
                         user_reward.save()
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_stock()
+        is_new = self.pk is None  # Check if order is new
+        super().save(*args, **kwargs)  # Save first
+
+        if not is_new and self.order_status == 'received':
+            self.update_stock()  # Update stock only when received
 
 
 @receiver(pre_save, sender=Order)
 def pre_save_order(sender, instance, **kwargs):
-    try:
-        previous_order = Order.objects.get(id=instance.id)
-        if instance.order_status != previous_order.order_status:
-            instance.order_status_changed = True
-        else:
-            instance.order_status_changed = False
-    except Order.DoesNotExist:
-        instance.order_status_changed = True
+    if instance.id:  # Ensure the order exists
+        try:
+            previous_order = Order.objects.get(id=instance.id)
+            if instance.order_status != previous_order.order_status:
+                instance.order_status_changed = now()  # Set timestamp if changed
+            else:
+                instance.order_status_changed = previous_order.order_status_changed
+        except Order.DoesNotExist:
+            instance.order_status_changed = now()  # Set timestamp for new orders
+    else:
+        instance.order_status_changed = now()  # New orders always have a timestamp
+
 
 
 @receiver(post_save, sender=Order)

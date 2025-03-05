@@ -1,0 +1,51 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+
+{% block title %} Notification List {% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="mb-3">Notifications</h2>
+
+    {% if notification %}
+        <div class="card shadow-sm p-3">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notif in notification %}
+                        <tr class="{% if not notif.read %}table-warning{% endif %}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ notif.message }}</td>
+                            <td>{{ notif.created_at|date:"d M Y, H:i" }}</td>
+                            <td>
+                                {% if notif.read %}
+                                    <span class="badge bg-success">Read</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Unread</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not notif.read %}
+                                    <a href="{% url 'mark_notification_read' notif.id %}" class="btn btn-sm btn-primary">
+                                        Mark as Read
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="alert alert-info">No notifications available.</p>
+    {% endif %}
+</div>
+{% endblock %}
