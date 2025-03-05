@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from django.contrib.auth import login,logout
 from rest_framework import status
 from rest_framework.views import APIView
+from app2.models import AboutUS
 from accounts.serializers import  (UserLoginSerializer, 
                                   UserRegistrationSerializer,
                                   UserProfileSerializer,
@@ -10,14 +11,18 @@ from accounts.serializers import  (UserLoginSerializer,
                                   SendPasswordResetEmailSerializer,
                                   UserPasswordResetSerializer,
                                   UserSerializer,
-                                 
+                                  OTPValidationSerializer,
+                                  AboutUSSerializer,
+                                  UserRewardSerializers
                                 )
 from django.contrib.auth import authenticate
 from accounts.renderers import UserRenderer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
-from . models import User
+from . models import User,UserOTP,UserReward
+from rest_framework import generics
+
 
 # Generate Token Manually
 def get_tokens_for_user(user):
@@ -52,6 +57,8 @@ class UserListView(APIView):
                 users = User.objects.all()
                 serializer = UserSerializer(users, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+                
+            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -63,6 +70,7 @@ class UserRegistrationView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        UserReward.objects.create(user=user)
         token = get_tokens_for_user(user)
         return Response({
             'user': UserSerializer(user).data,
@@ -71,11 +79,8 @@ class UserRegistrationView(APIView):
             'success': 'true',
         }, status=status.HTTP_201_CREATED)
       except Exception as e:
-          if hasattr(e, 'detail') and isinstance(e.detail, dict):
-                error_detail = format_serializer_errors(serializer)
-                return error_response(error_detail)
-          else:
-              return error_response(str(e))
+          return Response(str(e),status=status.HTTP_400_BAD_REQUEST)
+       
 
 class UserLoginView(APIView):
 #   renderer_classes = [UserRenderer]
@@ -161,6 +166,51 @@ class UserPasswordResetView(APIView):
     return Response({'message':'Password Reset Successfully !','success':'true'}, status=status.HTTP_200_OK)
 
 
+class SendPasswordResetEmailView(APIView):
+  # renderer_classes = [UserRenderer]
+  def post(self, request, format=None):
+    serializer = SendPasswordResetEmailSerializer(data=request.data)
+    print(request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response({'message':'An OTP code has been sent to your email. Please check your email and use the code to reset your password', 'success':'true'}, status=status.HTTP_200_OK)
+
+class OTPValidation(APIView):
+    def post(self, request, format=None):
+        serializer = OTPValidationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            response_data = {'message': 'OTP code validated successfully!', 'success': True, 'user_id': user.id}
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        else:
+            return Response({'message': 'OTP code validation failed!', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.utils import timezone
+class UserPasswordResetView(APIView):
+    def post(self, request, format=None):
+        user_id = request.data.get('user_id')  
+        user = User.objects.get(id=user_id)
+        password_reset_serializer = UserPasswordResetSerializer(data=request.data, context={'user': user})
+        
+        if password_reset_serializer.is_valid():
+            new_password = password_reset_serializer.validated_data['newPassword']
+            confirm_password = password_reset_serializer.validated_data['confirmPassword']
+
+            if new_password != confirm_password:
+                return Response({'message': 'New password and confirm password do not match.', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+
+            userotp = UserOTP.objects.get(user=user)
+            if userotp.otp_code_expiration is not None and userotp.otp_code_expiration < timezone.now():
+                return Response({'message': 'OTP code has expired.', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Reset the password for the user
+            user.set_password(new_password)
+            user.save()
+
+            return Response({'message': 'Password reset successfully!', 'success': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Failed to reset the password!', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
 
 # logout User
 class LogoutView(APIView):
@@ -183,4 +233,79 @@ class LogoutView(APIView):
             print("Refresh token not provided.")
             return Response({"detail": "Refresh token not provided."}, status=400)
         
+   
 
+class AboutUsView(APIView):
+    def get(self, request):
+        try:
+            aboutus = AboutUS.objects.first()
+            serializer = AboutUSSerializer(aboutus)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
+''' user rewards list views'''
+class UserRewardViews(generics.ListAPIView):
+    serializer_class = UserRewardSerializers
+    permission_classes =[IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = UserReward.objects.filter(user=self.request.user)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+        return Response(data[0]) 
+        
+        
+''' social login with facebook and google'''
+import requests
+from django.core.files.base import ContentFile
+from io import BytesIO
+from PIL import Image
+
+class SocialRegisterLoginView(APIView):
+    def post(self, request, format=None):
+        try:
+            data = request.data
+            email = data.get('email')
+
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user:
+                login_view_instance = UserLoginView()
+                login_request = request._request
+                login_request.data = {'email': existing_user.email, 'password': existing_user.name}
+                return login_view_instance.post(login_request)   
+            else:   
+                user_data={
+                    'email': data.get('email'),
+                    'name': data.get('name'),
+                    'image_url':data.get('photo'),
+                    'password': data.get('name'),  
+                    'password2':  data.get('name'), 
+                }
+                
+                serializer = UserRegistrationSerializer(data=user_data)
+                if serializer.is_valid(raise_exception=True):
+                    user = serializer.save()
+                    
+                    UserReward.objects.create(user=user)
+                    
+                    token = get_tokens_for_user(user)
+                    
+                    user_data = UserSerializer(user).data
+                    
+                    return Response({
+                        'user': user_data,
+                        'token': token,
+                        'message': 'Register Successful!',
+                        'success': True,
+                    }, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"errors":serializer.errors,"success":False}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        

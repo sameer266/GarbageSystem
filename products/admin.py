@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import Category, SubCategory,Product,Unit,Banner,Vehicle,Advertisement
+from . models import Category,Product,Unit,Banner,Vehicle,Advertisement,Invoice,Invoice_Item,Stock
 from django.utils.html import format_html
 from django.conf import settings
 
@@ -30,13 +30,6 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Category,CategoryAdmin)
 
 
-
-class SubCategoryAdmin(admin.ModelAdmin):
-    model  = SubCategory
-    list_display =['sub_category_name','category','image','ordering']
-admin.site.register(SubCategory,CategoryAdmin)
-
-
 class UnitAdmin(admin.ModelAdmin):
     model = Unit
     list_display =['unit_name']
@@ -53,3 +46,18 @@ class VehicleAdmin(admin.ModelAdmin):
     model = Vehicle
     list_display =['vehicle_number','driver']
 admin.site.register(Vehicle,VehicleAdmin)
+
+
+class StockAdmin(admin.ModelAdmin):
+    model =Stock
+    list_display =['id','product','quantity','sold_quantity']
+admin.site.register(Stock,StockAdmin)
+
+
+class InvoiceItemAdmin(admin.TabularInline):
+    model  = Invoice_Item
+
+class InvoceAdmin(admin.ModelAdmin):
+    inlines =[InvoiceItemAdmin]
+    list_display =['transaction','customer','total','date_created']
+admin.site.register(Invoice,InvoceAdmin)

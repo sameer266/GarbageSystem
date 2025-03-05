@@ -76,27 +76,6 @@ Daily Transaction
 
                                 <!-- Billing Content-->
                                 <div class="tab-pane show active" id="billing-information">
-
-                                    {% comment %} <form method="get" action="{% url 'dashboard:daily_tran_filter' %}">
-
-                                        <div class="row mb-3">
-                                         <div class="col-md-6">
-                                               <div class="input-group">
-                                                <b class="text-bold"> Start Date</b>
-                                                <br>
-                                                <input class="form-control" id="nepali-start-datepicker" type="text" name="startdate" value="" placeholder="Choose Start Date" required>
-                                            </div>
-                                         </div>
-                                         <div class="col-md-6">
-                                               <div class="input-group">
-                                                <b class="text-bold">End Date</b>
-                                                <input class="form-control" id="nepali-end-datepicker" type="text" name="enddate" value="" placeholder="Choose Ending Date" required>                                                  <button type="submit"  class="btn btn-primary">Search</button>
-                                               </div>
-                                         </div>
-                                      </div> 
-                                   </form> {% endcomment %}
-
-
                                  <form method="post" action="{% url 'dashboard:daily_tran_filter' %}">
                                         {% csrf_token %}
                                     <div class="row justify-content-between">
@@ -116,7 +95,6 @@ Daily Transaction
                                         </div>
                                         <div class="col-md-2">
                                             <br>
-                                            {% comment %} <div class="btn btn-info"><a class="text-white" href="">View All</a></div> {% endcomment %}
                                         </div>
                                         
                                     </div>
@@ -141,6 +119,7 @@ Daily Transaction
                                                         <th>DATE</th>
                                                         <th>PRODUCT</th>
                                                         <th>QUANTITY</th>
+                                                        <th>Rate</th>
                                                         <th>Unit</th>
                                                         <th></th>
                                                         <th>REMARKS</th>
@@ -169,6 +148,13 @@ Daily Transaction
                                                                     <ul class="m-0 d-inline-block align-middle font-16">
                                                                         {% for obj in item.dailyId.all %}
                                                                             <li class=" ">{{obj.quantity}}</li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </td>
+                                                                <td>
+                                                                    <ul class="m-0 d-inline-block align-middle font-16">
+                                                                        {% for obj in item.dailyId.all %}
+                                                                            <li class=" ">{{obj.product.rate}}</li>
                                                                         {% endfor %}
                                                                     </ul>
                                                                 </td>

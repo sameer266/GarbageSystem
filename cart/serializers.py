@@ -3,17 +3,22 @@ from rest_framework import serializers
 from products.serializers import ProductSerializer
 from accounts.models import User
 from products.models import Product
+# from cart import Cart
 
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ['cart_item_id','product','quantity','unit']
+        fields = ['cart_item_id','cart','product','quantity', 'unit']
+
+
 
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many = True)
-   
+    # customer = serializers.SlugRelatedField(
+    #     queryset=User.objects.all(), slug_field="name"
+    # )
 
     class Meta:
         model = Cart
@@ -24,16 +29,23 @@ class CartSerializer(serializers.ModelSerializer):
         user = self.context.get('user')
         cart= Cart.objects.filter(customer = user).first()
         if cart is None:
-            cart = Cart.objects.create(customer=user,**validated_data)
+            print(cart)
+            cart = Cart.objects.create(customer=user, **validated_data)
+            for item_data in items_data:
+                CartItem.objects.create(cart=cart, **item_data)
         else:
-            cart = Cart.objects.filter(customer = user).first()
-            cartitems = cart.items.all()
-            cartitems.delete()
+            for item_data in items_data:
+                existing_item = cart.items.filter(product=item_data['product']).first()
 
-        for item_data in items_data:
-            CartItem.objects.create(cart=cart, **item_data)
+                if existing_item:
+                    existing_item.quantity += item_data.get('quantity', 1)
+                    existing_item.save()
+                else:
+                    CartItem.objects.create(cart=cart, **item_data)
+
 
         return cart
+    
 
 
 
@@ -42,7 +54,7 @@ class CartItems_Serializer(serializers.ModelSerializer):
     product= ProductSerializer()
     class Meta:
         model = CartItem
-        fields = ['cart_item_id','product','quantity']
+        fields = ['cart_item_id','cart','product','quantity']
 
 
 class CartItemListSerializer(serializers.ModelSerializer):
@@ -50,16 +62,10 @@ class CartItemListSerializer(serializers.ModelSerializer):
     customer = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field="name"
     )
-    
-    total_cost = serializers.SerializerMethodField()
-
     class Meta:
         model = Cart
-        fields = ['cart_id', 'customer','total_cost', 'items']
-
-
-    def get_total_cost(self, obj):
-        return obj.get_total_cost()
+        fields = ['cart_id', 'customer', 'items']
 
     
+
 

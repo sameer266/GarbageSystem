@@ -6,7 +6,7 @@
 {% block body %}
 
 <style>
-    #id_rate,#id_product_name , #id_price,#id_location,#id_isInstock,#id_rating,#id_vendor,#id_category{
+    #id_rate,#id_product_name ,  #id_unit, #id_price,#id_location,#id_isInstock,#id_rating,#id_vendor,#id_category{
         width: 100%;
         padding: 8px;
         border: 1px solid #ced4da;
@@ -65,13 +65,15 @@
                                             </div>
                                             <div class="mb-3">
 
-                                            <div id="subcategory-div">
-                                                <label for="subcategory">Subcategory:</label>
-                                                <select name="sub_category" id="subcategory">
-                                                    <option value="">---------</option>
-                                                </select>
-                                            </div>
+                                          
                                             </div> 
+                                            
+                                        <!--Previous Rate -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.previous_rate.id_for_label }}" class="form-label">Previous Rate</label>
+                                            {{ form.previous_rate }}
+                                        </div>
+                                        
                                         <!-- Rate -->
                                         <div class="mb-3">
                                             <label for="{{ form.rate.id_for_label }}" class="form-label">Rate</label>
@@ -85,6 +87,13 @@
                                             <label for="{{ form.unit.id_for_label }}" class="form-label">Unit</label>
                                             {{ form.unit }}
                                         </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="{{ form.order_number.id_for_label }}" class="form-label">Order Number</label>
+                                            {{ form.order_number }}
+                                        </div>
+                                        
+                                        
                                         <!-- Product Image -->
                                         <div class="mb-3 mt-3 mt-xl-0">
                                             <label for="{{ form.product_image.id_for_label }}" class="form-label">Image:</label>

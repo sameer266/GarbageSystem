@@ -29,11 +29,11 @@ Advertisement
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="row mb-2">
-                                         <div class="col-sm-5">
-                                                <a href="{% url 'dashboard:add_Advertisement' %}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Advertisement</a>
-                                            </div> 
-                                        </div>
+                                        <!--<div class="row mb-2">-->
+                                        <!-- <div class="col-sm-5">-->
+                                        <!--        <a href="{% url 'dashboard:add_Advertisement' %}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Advertisement</a>-->
+                                        <!--    </div> -->
+                                        <!--</div>-->
                                         <div class="table-responsive"style="overflow-x: auto; width: 100%;" >
                                             <table class="table table-striped dt-responsive w-100 " id=""  >        
                                                     <tr>
@@ -54,7 +54,7 @@ Advertisement
                                          
                                             <td>
                                                 <div class="image-gallery" >
-                                                    <img class="thumbnail" src="{{item.banner.url}}" style="width:600px;" alt="Thumbnail Image">
+                                                    <img class="thumbnail" src="{{item.banner.url}}" style="width:100%" alt="Thumbnail Image">
                                                     <!-- Add more thumbnail images here if you have multiple images in the gallery -->
                                                 </div>
                                                 <div class="modal" id="imageModal">
@@ -68,7 +68,7 @@ Advertisement
                                             <td>
                                                 <a href="{% url 'dashboard:edit_Advertisement' item.id %}" class="font-18 text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="uil uil-pen"></i></a>
 
-                                                <a href="#MainCategorieDeleteModel{{item.id}}" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+                                                <!--<a href="#MainCategorieDeleteModel{{item.id}}" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>-->
                                             </td>
                                         </tr>
                                         {%endfor%}

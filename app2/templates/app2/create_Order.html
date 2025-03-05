@@ -1,124 +1,159 @@
-
-
 {% extends 'app2/base.html' %}
 {% load static %}
-{% block title %} 
-{% if instance %}Create Order{% else %}Add Order{% endif %}
+{% block title %}
+    {% if instance %}Edit Order{% else %}Create Order{% endif %}
 {% endblock %}
+
 {% block body %}
-
 <style>
-    #id_totalPrice,#id_product_name , #id_price,#id_location,#id_isInstock,#id_rating,#id_vendor,#id_category{
+    .form-control {
         width: 100%;
         padding: 8px;
         border: 1px solid #ced4da;
         border-radius: 4px;
         box-sizing: border-box;
-      }
-    
-      [id^="id_items-"]:not([id$="-DELETE"]) {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        box-sizing: border-box;
-      }</style>
-            <!-- ============================================================== -->
-            <!-- Start Page Content here -->
-            <!-- ============================================================== -->
+    }
+    .remove-form {
+        margin-left: 10px;
+    }
+</style>
 
-            <div class="content-page">
-                <div class="content">
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid">
+            <!-- Page Title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <h4 class="page-title">{% if instance %}Edit Order{% else %}Create Order{% endif %}</h4>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Start Content-->
-                    <div class="container-fluid">
+            <!-- Form Section -->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Display Messages -->
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <strong>{{ msg.tags|title }}:</strong> {{ msg.message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
-                        <!-- start page title -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="page-title-box">
-                               
-                                    <h4 class="page-title">{% if instance %}Create Order{% else %}Add Order{% endif %}</h4>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Left Column: User and Order Details -->
+                                    <div class="col-xl-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.user.id_for_label }}" class="form-label">User</label>
+                                            {{ form.user }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.payment_method.id_for_label }}" class="form-label">Payment Method</label>
+                                            {{ form.payment_method }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.order_status.id_for_label }}" class="form-label">Order Status</label>
+                                            {{ form.order_status }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column: Order Items -->
+                                    <div class="col-xl-6">
+                                        {{ formset.management_form }}
+                                        <div id="form-container">
+                                            <!-- Display only the first form initially -->
+                                            {% with formset.forms|first as form %}
+                                                <div class="form-row mb-3">
+                                                    {{ form.as_p }}
+                                                    <!-- Remove button for the first form (hidden initially) -->
+                                                    <button type="button" class="btn btn-danger btn-sm remove-form" style="display: none;">X</button>
+                                                </div>
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Add New Item Button -->
+                                <div class="row mt-3">
+                                    <div class="col-auto">
+                                        <button type="button" id="add-item" class="btn btn-success">Add Item</button>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="row mt-3">
+                                    <div class="col-auto">
+                                        <a href="{% url 'dashboard:active_order_list' %}" class="btn btn-danger">Back to Table</a>
+                                        <button type="submit" name="calculate_total" class="btn btn-secondary">Calculate Total Price</button>
+                                        <button type="submit" class="btn btn-primary">
+                                            {% if instance %}Update Order{% else %}Save Order{% endif %}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- end page title -->
-                     
-                        <form method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                                {% if messages %}
-                                {% for msg in messages %}
-                                    <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
-                
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-                                        <div class="row">
+<!-- JavaScript to Add and Remove Forms Dynamically -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formContainer = document.getElementById('form-container');
+        const totalForms = document.getElementById('id_items-TOTAL_FORMS'); // Ensure this ID matches your management form
+        let formCount = parseInt(totalForms.value);
 
-                                            <div class="col-xl-6">
+        // Function to update the TOTAL_FORMS field
+        function updateTotalForms() {
+            totalForms.value = formCount;
+        }
 
-                                                     <!-- Date View -->
-                                                    <div class="mb-3">
-                            <label for="{{ form.ordering.id_for_label }}" class="form-label">User</label>
-                          {{form.user}}
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.Order_name.id_for_label }}" class="form-label">Payment Method</label>
-                           {{form.payment_method}}
-                        </div>
-<div class="mb-3">
-                            <label for="{{ form.Order_name.id_for_label }}" class="form-label">Order Status</label>
-                           {{form.order_status}}
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.Order_name.id_for_label }}" class="form-label">Total Price</label>
-                           {{form.totalPrice}}
-                        </div> 
-                                            </div>
-                        <div class="col-xl-6">
-                 
-                        {{ formset.management_form }}
-                        {% for form in formset %}
-                            {{ form.as_p }}
-                        {% endfor %}
-                                                    
-                                                   
-                                              <br><br>                                               
-                                                </div>
-                                           
-                                            </div> <!-- end col-->
-                                        
-                                            <div class="col-auto">
-                                                {% comment %} <a href="{% url 'dashboard:Order' %}" class="btn btn-danger"><i class=""></i>Back to Table</a> {% endcomment %}
+        // Add new form
+        document.getElementById('add-item').addEventListener('click', function() {
+            const emptyForm = `{{ formset.empty_form.as_p|escapejs }}`;
+            const newFormHtml = emptyForm.replace(/__prefix__/g, formCount);
 
-                                                {% if instance %}
-                                                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Add and Update </button>
-                                                {% else %}
-                                                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Save</button>
-                                                {% endif %}
-                                            </div>
-                                            <br>  <br>  <br>  <br>  <br>  <br>  <br>  <br><br>
-                                        </div>
-                                        <!-- end row -->
+            const newFormDiv = document.createElement('div');
+            newFormDiv.classList.add('form-row', 'mb-3');
+            newFormDiv.innerHTML = newFormHtml;
 
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
-                        </div>
-                        <!-- end row-->
-                    </form> 
+            // Add a remove button to the new form
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.classList.add('btn', 'rounded', 'btn-danger', 'btn-sm', 'remove-form');
+            removeButton.textContent = 'X';
+            removeButton.addEventListener('click', function() {
+                formContainer.removeChild(newFormDiv);
+                formCount--;
+                updateTotalForms();
+            });
 
-                  
+            newFormDiv.appendChild(removeButton);
+            formContainer.appendChild(newFormDiv);
 
-                    </div> <!-- container -->
+            formCount++;
+            updateTotalForms();
+        });
 
-                </div> <!-- content -->
-
-
-       {%endblock%}
+        // Add remove functionality to existing forms
+        document.querySelectorAll('.remove-form').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const formRow = button.closest('.form-row');
+                formContainer.removeChild(formRow);
+                formCount--;
+                updateTotalForms();
+            });
+        });
+    });
+</script>
+{% endblock %}

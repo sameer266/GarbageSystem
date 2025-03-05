@@ -1,0 +1,59 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+
+{% block title %}
+  Add Stock
+{% endblock %}
+
+{% block body %}
+<div class="content-page">
+    <div class="content">
+        <!-- Start Content-->
+        <div class="container-fluid pt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10 col-sm-12">
+                    <div class="card card-default rounded-3 shadow-lg">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                <h4 class="card-title fw-bold mb-0">Add Stock</h4>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="container-fluid">
+                                <!-- Form to Add Stock -->
+                                <form method="POST" action="{% url 'dashboard:inventory_add' %}">
+                                    {% csrf_token %}
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label fw-bold">Product</label>
+                                        <select class="form-select form-control-lg" id="product_name" name="product_name" required>
+                                            {% for product in products %}
+                                                <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="quantity" class="form-label fw-bold">Available Quantity</label>
+                                        <input type="number" class="form-control form-control-lg" id="quantity" name="quantity" step="any" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="sold_quantity" class="form-label fw-bold">Quantity Sold</label>
+                                        <input type="number" class="form-control form-control-lg" id="sold_quantity" name="sold_quantity" step="any" required>
+                                    </div>
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <button type="submit" class="btn btn-primary btn-md me-md-2">
+                                           </i>Add Stock 
+                                        </button>
+                                        <a href="/inventory" class="btn btn-outline-secondary btn-md ">
+                                        Go Back to Inventory
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

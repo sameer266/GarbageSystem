@@ -17,7 +17,7 @@ class Cart(models.Model):
         return sum([item.get_cost() for item in self.items.all()])
     
     def __str__(self):
-        return "cart items"+" "+ str(self.customer)+" "+ str(self.cart_id)
+        return "cart items" + " "+ str(self.customer)+" "+ str(self.cart_id)
 
 class CartItem(models.Model):
     cart_item_id = models.UUIDField(
@@ -35,6 +35,7 @@ class CartItem(models.Model):
     
     def __str__(self):
         return str(self.cart)
+    
 
 
 

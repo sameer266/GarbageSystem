@@ -11,3 +11,11 @@ class AboutUSAdmin(admin.ModelAdmin):
     list_display =['id','email','logo']
 admin.site.register(AboutUS,AboutUSAdmin)
 
+
+class PrivacyPolicyAdmin(admin.ModelAdmin):
+    model = PrivacyPolicy
+    list_display =['id','title']
+admin.site.register(PrivacyPolicy,PrivacyPolicyAdmin)
+
+
+admin.site.register(Customers)

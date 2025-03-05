@@ -58,7 +58,6 @@
                                             <div class="col-xl-6">
                                                 <div class="mb-3">
                                                     <label for="billing-first-name" class="form-label">Date <span class="text-danger">*</span></label><br>
-                                                    {% comment %} {{form.date}} {% endcomment %}
                                                     <input class="form-control"  type="text" id="nepali-start-datepicker" name="date" value="{% if instance %} {{ instance.date}} {% else %}  {% endif %}" {% if not instance %}required  {% endif %}  >
                                                 </div> 
 
@@ -89,7 +88,7 @@
                                          <!-- end col-->
                                         
                                             <div class="col-auto">
-                                                <a href="{% url 'dashboard:index' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
+                                                <a href="{% url 'dashboard:pick_up_plans' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
 
                                                 {% comment %} <a href="{% url 'training_category' %}" class="btn btn-danger"><i class=""></i>Back to Table</a> {% endcomment %}
                                                 {% if instance %}

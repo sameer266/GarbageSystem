@@ -1,0 +1,49 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+
+{% block title %}
+  Edit Stock
+{% endblock %}
+
+{% block body %}
+<div class="content-page">
+  <div class="content">
+    <!-- Start Content-->
+    <div class="container-fluid pt-5">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="card card-default rounded-0 shadow">
+            <div class="card-header">
+              <div class="d-flex w-100 align-items-center justify-content-between">
+                <h4 class="card-title fw-bold">Edit Stock for {{ stock_item.product.product_name }}</h4> <!-- Display product name here -->
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="container-fluid">
+                <!-- Form to Edit Stock -->
+                <form method="POST">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <label for="quantity" class="form-label">Available Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" value="{{ stock_item.quantity }}" step="any" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="sold_quantity" class="form-label">Quantity Sold</label>
+                    <input type="number" class="form-control" id="sold_quantity" name="sold_quantity" value="{{ stock_item.sold_quantity }}" step="any" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update Stock</button>
+                </form>
+
+                <hr>
+
+                <!-- Back Button -->
+                <a href="/inventory" class="btn btn-secondary">Go Back to Inventory</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

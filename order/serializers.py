@@ -2,7 +2,7 @@ from rest_framework import serializers
 from products.models import Product,Unit
 from accounts.models import User
 from products.serializers import ProductSerializer
-from .models import Order, OrderItem,RequestAddress
+from .models import Order, OrderItem,RequestAddress,Notification
 from cart.models import Cart
 from accounts.models import User
 
@@ -55,6 +55,29 @@ class OrderSerializer(serializers.ModelSerializer):
         order.save()
 
         return order
+
+
+class OrderItems(serializers.ModelSerializer):
+    product = ProductSerializer( read_only=True)
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity', 'unit']
+
+class UserOrderSerializer(serializers.ModelSerializer):
+    items = OrderItems(many = True)
+    address = RequestAddressSerializer()
+    class Meta:
+        model = Order
+        fields = ['id', 'payment_method', 'order_status', 'totalPrice', 'created', 'updated', 'driver', 'items', 'address']
+        
+        
+'''Notification serializers'''
+class NotificationSerializers(serializers.ModelSerializer):
+    class Meta:
+        model  = Notification
+        fields = '__all__'
+
+
 
 
 

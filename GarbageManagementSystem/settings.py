@@ -27,12 +27,14 @@ SECRET_KEY = 'django-insecure-4zmowgg%7pswlt5nsynkpy&w2vnm3wso7(9#0&wzubcz^thn^#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.18.97']
+ALLOWED_HOSTS = ['127.0.0.1','http://nepalrecyclebank.com','https://nepalrecyclebank.com','nepalrecyclebank.com','www.nepalrecyclebank.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # 'daphne',
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,7 +48,13 @@ INSTALLED_APPS = [
     'cart',
     'order',
     'app2',
+    
+    'corsheaders',
+ 
+    
     'accounting',
+    
+    'ckeditor',
     #third party
     'rest_framework',
     'rest_framework_simplejwt',
@@ -60,16 +68,18 @@ SITE_ID = 1
 #REST_FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        
-    )
+        'rest_framework.authentication.SessionAuthentication',  # Enables session-based authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Enables JWT authentication
+    ),
 }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -166,14 +176,25 @@ AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "gglimsu@gmail.com" 
-EMAIL_HOST_PASSWORD = "whnzrpfyatngtaye"
+EMAIL_HOST_USER = "garbagemanagement6@gmail.com" 
+EMAIL_HOST_PASSWORD = "kweponsigwpgjsqb"
 EMAIL_USE_TLS = True
+
+
+
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+
+LOGIN_REDIRECT_URL = 'dashboard:login'
+LOGOUT_REDIRECT_URL = 'dashboard:login'
+
 
 # JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5760),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=5),
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -189,7 +210,19 @@ SIMPLE_JWT = {
 
 }
 
+CORS_ALLOW_ALL_ORIGINS=True
 
+
+# # Channels
+# ASGI_APPLICATION = "GarbageManagementSystem.asgi.application"
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
 
 
 DEFAULT_UNKNOWN_PERSON_IMAGE_URL ="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmg6Ov4Q4YHiD79E_tiZlFEPKnDWxA3pnIPA&usqp=CAU"

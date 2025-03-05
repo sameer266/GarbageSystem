@@ -4,18 +4,9 @@ from django.db.models import Min,Max,Sum
 from django.contrib import sessions
 register = template.Library()
 
-@register.filter
-def multiply(value, arg):
-    return value * arg
-
-
-# @register.filter
-# def toll_related_total(id):
-#     total_amount = 0.0
-#     toll = Toll.objects.get(id=id)
-#     customers = Customer.objects.filter(toll=toll)
-#     for item in customers.
-
+@register.filter(name='multiply')
+def multiply(quantity, price):
+    return quantity * price
 
 @register.filter(name='calculate_total')
 def calculate_total(items, sales):
@@ -140,3 +131,24 @@ def remove_decimal(value):
 def calculate_total_daily(items, date):
     total = DailyTransaction.objects.filter(dailyid__nepali_date=date).aggregate(total=Sum('total_amount'))['total']
     return total
+
+
+
+from atexit import register
+from django import template
+from cryptography.fernet import Fernet
+from django.conf import settings
+
+
+register = template.Library()
+
+@register.filter
+def replaceBlank(value,stringVal = ""):
+    value = str(value).replace(stringVal, '')
+    return value
+
+@register.filter
+def encryptdata(value):
+    fernet = Fernet(settings.ID_ENCRYPTION_KEY)
+    value = fernet.encrypt(str(value).encode())
+    return value

@@ -51,7 +51,7 @@
                                                      <!-- Date View -->
                                                      <div class="mb-3">
                                                         <label for="{{ form.vehicle_number.id_for_label }}" class="form-label">Vehicle_number</label>
-                                                        <input type="number" name=" {{ form.vehicle_number.name }}  " id="{{ form.vehicle_number.id_for_label }}" class="form-control" required
+                                                        <input type="text" name=" {{ form.vehicle_number.name }}  " id="{{ form.vehicle_number.id_for_label }}" class="form-control" required
                                                                value="{% if instance %}{{ instance.vehicle_number }}{% endif %}" placeholder="Enter vehicle_number">
                                                     </div>
 

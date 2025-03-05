@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from . models import Category, SubCategory,Product,Unit,Banner,Advertisement
+from . models import Category,Product,Unit,Banner,Advertisement
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
@@ -18,10 +18,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SubCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubCategory
-        fields ='__all__'
 
 
 class ProductUnitSerializer(serializers.ModelSerializer):
@@ -35,9 +31,7 @@ class ProductSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
             queryset=Category.objects.all(), slug_field="category_name", required=False
         )
-    sub_category = serializers.SlugRelatedField(
-            queryset=SubCategory.objects.all(), slug_field="sub_category_name", required=False
-        ) 
+    
     unit = serializers.SlugRelatedField(
             queryset=Unit.objects.all(), slug_field="unit_name", required=False
         ) 

@@ -1,0 +1,145 @@
+{% extends 'app2/base.html' %} 
+{% load custome_filter %} 
+{% load static %}
+{% block title %}
+Sales Table
+{% endblock %}
+{%block body %}
+<div class="content-page">
+  <div class="content">
+
+    
+    <!-- Start Content-->
+    <div class="container-fluid">
+      
+      <div class="row pt-3">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="card card-default rounded-0 shadow">
+           
+            <div class="card-header">
+              <!-- start sales header section -->
+              <div class="row">
+                      
+                <div class="col-md-4 ">
+                    <div class="card p-3 bg-warning text-white ">
+                        <div class="d-flex">
+                            <i class="ri-price-tag-line fs-1"></i>
+                            <h4 class="ps-2 pt-2"> Total Sales Amount</h4>
+                        </div>
+                        <h4>Rs {{total_amount}}</h4>
+                   
+                        
+                    </div>
+                </div>
+                <div class="col-md-4 ">
+                    <div class="card p-3 bg-danger text-white ">
+                        <div class="d-flex">
+                            <i class="ri-price-tag-line fs-1"></i>
+                            <h4 class="ps-2 pt-2"> Total Sales</h4>
+                        </div>
+                        <h4>{{total_sales}}</h4>
+                    </div>
+                </div>
+  
+                <div class="col-md-4 ">
+                   <a href="{% url 'dashboard:order_list'%}" style="color: white;"> <div class="card p-3 bg-info text-white">
+                        <div class="d-flex">
+                            <i class="ri-order-play-line fs-1"></i>
+                            <h4 class ="ps-2 pt-2" style="color: white;">Total Order</h4>
+                        </div>
+                       <h4 style="color: white;"> {{totalOrders}} Orders</h4>
+                    </a>
+                </div>
+              </div>
+              <!-- end sales header section -->
+
+              <div class="d-flex w-100 align-items-center justify-content-between">
+                <h4 class="card-title fw-bold">Sales Table
+                </h4>
+                <a href="{% url 'dashboard:create_sales' %}" class="card-title fw-bold btn btn-primary btn-sm">Add New Sale</a>
+              </div>
+            </div>
+            <div class="card-body pt-1">
+              <div class="container-fluid">
+                <table class="table table-bordered" id="product-list">
+                  <colgroup>
+                    <col width="5%" />
+                    <col width="20%" />
+                    <col width="20%" />
+                    <col width="20%" />
+                    <col width="15%" />
+                    <col width="25%" />
+                    <col width="25%" />
+                  </colgroup>
+                  <thead>
+                    <tr class="bg-gradient bg-primary bg-opacity-50 text-light">
+                      <th class="px-2 py-2 text-center">S.N</th>
+                      <th class="px-2 py-2 text-center">Transaction</th>
+                      <th class="px-2 py-2 text-center">Suppliers Name</th>
+                      <th class="px-2 py-2 text-center">Product</th>
+                      <th class="px-2 py-2 text-center">Total</th>
+                      <th class="px-2 py-2 text-center">Date</th>
+
+                      <th class="px-2 py-2 text-center ">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in sales %}
+                    <tr>
+                      <td class="px-2 py-1 align-middle text-center">
+                        {{ forloop.counter }}
+                      </td>
+                      <td class="px-2 py-1 align-middle text-center">{{ item }}</td>
+                      <td class="px-2 py-1 align-middle text-center">
+                        {{ item.customer }}
+                      </td>
+                      <td class="px-2 py-1 align-middle text-center">
+                      {% for product in item.invoice_items.all %}
+                        {{product.product}},<br>
+                      {% endfor %}
+                      </td>
+                      
+                      <td class="px-2 py-1 align-middle text-end">
+                        {{ item.total }}
+                      </td>
+                      <td>{{item.date_created}}</td>
+                      <td class="px-2 py-1 align-middle text-center d-flex">
+                                             <a href="{% url 'dashboard:sales_details' item.id %}" class="action-icon" title="view History"> <i class="mdi mdi-eye"></i></a>
+
+                        <a href="{% url 'dashboard:sale_invoice' item.id %}" target="_blank"title="print"><i class="mdi mdi-printer"></i></a>
+
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+             <!-- Pagination Section -->
+              <div class="pagination mt-3">
+                <span class="step-links float-center">
+                  {% if sales.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ sales.previous_page_number }}">previous</a>
+                  {% endif %}
+
+                  <span class="current">
+                    Page {{ sales.number }} of {{ sales.paginator.num_pages }}.
+                  </span>
+
+                  {% if sales.has_next %}
+                    <a href="?page={{ sales.next_page_number }}">next</a>
+                    <a href="?page={{ sales.paginator.num_pages }}">last &raquo;</a>
+                  {% endif %}
+                </span>
+              </div>
+            
+              
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

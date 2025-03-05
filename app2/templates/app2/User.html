@@ -2,8 +2,9 @@
 {% extends 'app2/base.html' %}
 {% load static %}
 {% block title %} 
-SubAdmin
+User
 {% endblock %}
+
 {% block body %}
 
             <!-- ============================================================== -->
@@ -19,11 +20,15 @@ SubAdmin
                         <div class="row">
                             <div class="col-12">
                                 <div class="page-title-box">
-                                    <h4 class="page-title">SubAdmin</h4>
+                                    <h4 class="page-title">User</h4>
                                 </div>
                             </div>
                         </div>
                         <!-- end page title -->
+
+                        <a href="{% url 'dashboard:add_user' %}" class="btn btn-primary mb-3 ">
+                            <i class="fas fa-user-plus"></i> Add User
+                        </a>
                      
                         <div class="row">
                             <div class="col-12">
@@ -31,7 +36,7 @@ SubAdmin
                                     <div class="card-body">
                                         <div class="row mb-2">
                                          <div class="col-sm-5">
-                                                <a href="{% url 'dashboard:add_SubAdmin' %}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add User</a>
+                                                {% comment %} <a href="{% url 'dashboard:add_SubAdmin' %}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add User</a> {% endcomment %}
                                             </div> 
                                         </div>
                                         <div class="table-responsive"style="overflow-x: auto; width: 100%;" >
@@ -82,7 +87,7 @@ SubAdmin
 
                                     
                                             <td>
-                                                <a href="{% url 'dashboard:edit_SubAdmin' item.id %}" class="font-18 text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="uil uil-pen"></i></a>
+                                                <a href="{% url 'dashboard:user_order_history' item.id %}" class="action-icon" title="view Detail"> <i class="mdi mdi-eye"></i></a>
 
                                                 <a href="#MainCategorieDeleteModel{{item.id}}" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
                                             </td>

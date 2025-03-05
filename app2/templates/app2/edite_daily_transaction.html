@@ -1,8 +1,8 @@
 {% extends 'app2/base.html' %}
 {% load static %}
 {% load custome_filter %}
-{% block title  %}
-    {% if instance%}
+{% block title %}
+    {% if instance %}
         Add Daily Transaction
     {% else %}
         Update Daily Transaction
@@ -10,15 +10,12 @@
 {% endblock %}
 
 {% block load_css %}
-
-
-
 <style>
     .scrollable-table {
         max-height: 350px; /* Set the maximum height for the table */
         overflow-y: auto; /* Add vertical scrollbar when content overflows */
     }
-    #id_product,#id_remarks,#id_unite{
+    #id_product, #id_remarks, #id_unite {
         display: block;
         width: 100%;
         padding: 0.45rem 0.9rem;
@@ -33,25 +30,19 @@
         -moz-appearance: none;
         appearance: none;
         border-radius: 0.25rem;
-        -webkit-transition: border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-        transition: border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+        -webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     }
 </style>
-
+<link href="http://nepalidatepicker.sajanmaharjan.com.np/nepali.datepicker/css/nepali.datepicker.v4.0.1.min.css" rel="stylesheet" type="text/css"/>
 {% endblock %}
 
 {% block body %}
-
-
 <div class="content-page">
     <div class="content">
-
         <!-- Start Content-->
         <div class="container-fluid">
-
-            <!-- start page title -->
+            <!-- Start Page Title -->
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
@@ -65,278 +56,194 @@
                     </div>
                 </div>
             </div>
-            <!-- end page title -->
+            <!-- End Page Title -->
 
+            <!-- Messages -->
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Form Section -->
             <div class="row">
                 <div class="col-12">
-                    {% if messages %}
-                        {% for msg in messages %}
-                            <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                                <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
                     <div class="card">
                         <div class="card-body">
+                            <p class="text-muted mb-4">
+                                {% if instance %}
+                                    Fill the form below to update the daily transaction.
+                                {% else %}
+                                    Fill the form below to create a new daily transaction.
+                                {% endif %}
+                            </p>
 
-                         
-                            <!-- Steps Information -->
-                            <div class="col-lg-12">
+                            <form method="post" action="{% if instance %}{% url 'dashboard:update_trasancation' instance.id %}{% else %}{% url 'dashboard:update_trasancation' %}{% endif %}">
+                                {% csrf_token %}
 
-                                <p class="text-muted mb-4">{% if instance %}Fill the form below to create Daily Transaction.{% else %}Update form below for update daily transition.{% endif %}</p>
-                                
-                                
-                                <form method="post" action="{% url 'dashboard:update_trasancation' instance.id %}">
-                                    
-                                    {% csrf_token %}
-                                    
-                                    {% if daily_form.errors %}
-                                        {% for field in daily_form %}
-                
-                                            {% for error in field.errors %}
-                                                    {{field.label}}: {{ error|escape }}
-                                            {% endfor %}
-                
-                                        {% endfor %}
-                                    {% endif %} 
-
-                                    
-                                    <div class="row">
-                
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="billing-first-name" class="form-label">Date <span class="text-danger">*</span></label><br>
-                                                
-                                                <input class="form-control" type="text" id="nepali-date" name="nepali_date" value="{% if instance %} {{ date}} {% else %} {{nepalidate}} {% endif %}" {% if not instance %}required  {% endif %}  >
-                                            </div> 
+                                <!-- Date and Total Amount -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="nepali-date" class="form-label">Date <span class="text-danger">*</span></label>
+                                            <input class="form-control" type="text" id="nepali-date" name="nepali_date" value="{% if instance %}{{ date }}{% else %}{{ nepalidate }}{% endif %}" required>
                                         </div>
-                                        
-                                        
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="billing-email-address" class="form-label">Total Amount<span class="text-danger">*</span></label>
-                                                <input class="form-control" name="total" type="number" value="{{instance.total}}" placeholder="Enter Total Amount" {% if not instance %}required{% endif %} />
-                                            </div>
-                                        </div>
-
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="total" class="form-label">Total Amount <span class="text-danger">*</span></label>
+                                            <input class="form-control" name="total" type="number" value="{{ instance.total }}" placeholder="Enter Total Amount" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Fields -->
+                                <div class="additional-fields">
                                     {% for item in selectdata %}
-                                    <div class="row">
-                                        <input type="hidden" name="transaction_id" value="{{item.id}}">
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="billing-first-name" class="form-label">Product <span class="text-danger">*</span></label><br>
-                                                <select class="form-control" id="product" name="product_{{ item.id }}" >
-                                                    {% for prod in products %}
-                                                        <option value="{{ prod.id }}"
-                                                            {% if prod.id == item.product.id %}
-                                                                selected
-                                                            {% endif %}
-                                                        >{{ prod.product_name }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                        <div class="row">
+                                            <input type="hidden" name="transaction_id" value="{{ item.id }}">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="product-{{ item.id }}" class="form-label">Product <span class="text-danger">*</span></label>
+                                                    <select class="form-control" id="product-{{ item.id }}" name="product_{{ item.id }}" required>
+                                                        {% for prod in products %}
+                                                            <option value="{{ prod.id }}" {% if prod.id == item.product.id %}selected{% endif %}>{{ prod.product_name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="quantity-{{ item.id }}" class="form-label">Quantity <span class="text-danger">*</span></label>
+                                                    <input class="form-control" name="quantity_{{ item.id }}" type="number" step="0.1" min="0.1" placeholder="Enter Quantity" value="{{ item.quantity }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="unite-{{ item.id }}" class="form-label">Unit <span class="text-danger">*</span></label>
+                                                    <select class="form-control" name="unite_{{ item.id }}" required>
+                                                        {% for unit in unites %}
+                                                            <option value="{{ unit.id }}" {% if unit.id == item.unite.id %}selected{% endif %}>{{ unit.unit_name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="mb-3">
+                                                    <label for="remarks-{{ item.id }}" class="form-label">Remarks <span class="text-danger">*</span></label>
+                                                    <textarea class="form-control" name="remarks_{{ item.id }}" required>{{ item.remarks }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mt-4 text-center">
+                                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_transaction-{{ item.id }}">Delete</button>
                                             </div>
                                         </div>
-
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="billing-last-name" class="form-label">Quantity <span class="text-danger">*</span></label><br>
-                                                <input class="form-control" name="quantity_{{ item.id }}" type="number" step="0.1" min="0.1" placeholder="Enter Quantity" value="{{item.quantity}}" {% if not instance %}required {% endif %} />
-                                            </div>
-                                        </div>
-                                     
-                
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="billing-first-name" class="form-label">Unit <span class="text-danger">*</span></label><br>
-                                                <select class="form-control" name="unite_{{item.id}}" {% if not instance %}required{% endif %}>
-                                                    {% for unit in unites %}
-                                                        <option value="{{ unit.id }}"
-                                                            {% if unit.id == item.unite.id %}
-                                                                selected
-                                                            {% endif %}
-                                                        >{{ unit.unit_name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                                
-                                                
-                                            </div>
-                                        </div>
-                
-                                        
-                                        <div class="col-md-8">
-                                            <div class="mb-3">
-                                                <label for="billing-phone" class="form-label">Remarks <span class="text-danger">*</span></label><br>
-                                                <textarea class="form-control"  name="remarks_{{item.id}}" >
-                                                    {{item.remarks}}
-                                                </textarea>
-                                                {% comment %} {{daily_form.remarks}} {% endcomment %}
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4 mt-4 text-center">
-                                            <button  type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_transaction-{{item.id}}">Delete</button>
-                                        </div>
-
-                                        
-
-                                    </div> <!-- end row -->
                                     {% endfor %}
-                                    <div class="additional-fields">
-                                        <!-- New fields will be appended here -->
+                                </div>
+
+                                <!-- Add Another Field Button -->
+                                <div class="row mt-4">
+                                    <div class="col-sm-12 text-center">
+                                        {% if not instance %}
+                                            <button type="button" class="btn btn-info" id="addAnotherField">Add Another</button>
+                                        {% endif %}
+                                        {% if instance %}
+                                            <a href="{% url 'dashboard:accounting' %}" class="btn btn-danger">Back to Table</a>
+                                            <input type="submit" class="btn btn-primary" value="Update Transaction">
+                                        {% else %}
+                                            <input type="submit" class="btn btn-success" value="Add Transaction">
+                                        {% endif %}
                                     </div>
-
-                
-                                    <div class="row mt-4 ">
-                                        <div class="col-sm-12 ">
-                                            <center>
-                                                {% if not instance %}
-                                                <button type="button" class="btn btn-info" id="addAnotherField">Add Another</button>
-                                                {% endif %}
-
-                                                {% if instance %}
-                                                <a href="{% url 'dashboard:cashbook' %}" class="btn btn-danger">Back to Table</a>
-                                                <input type="submit" class="btn btn-primary" value="Update Transaction ">
-                                                {% else %}
-                                                
-                                                <i class="mdi "></i><input type="submit" class="btn btn-success" value="Add Transaction ">
-                                                {% endif %}
-
-
-
-                                            </center>
-                                        </div> <!-- end col -->
-                                       
-                                    </div> <!-- end row -->
-                                </form>
-                            </div>
-                            
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col -->
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- end row-->
-
-        </div> <!-- container -->
-
-    </div> <!-- content -->
-
+        </div>
+    </div>
 </div>
 
-
-<!-- delete -->
-{% for item in selectdata%}
-<div id="delete_transaction-{{item.id}}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="danger-header-modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <form method ="post" action="{% url 'dashboard:delete_items' %}">
-            {% csrf_token %}
-        <div class="modal-content">
-            <input type="hidden" name="daily_id" value="{{instance.id}}">
-            <input type="hidden" value="{{item.id}}" name="transactionID">
-            <div class="modal-header bg-danger">
-                <h4 class="modal-title text-white" id="danger-header-modalLabel">Delete Daily Transaction</h4>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
-            </div>
-            <div class="modal-body bg-white">
-                Are your Sure ?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-danger">Yes</button>
-            </div>
-
-        </div><!-- /.modal-content -->
-        </form>
-    </div><!-- /.modal-dialog -->
-</div>
+<!-- Delete Modals -->
+{% for item in selectdata %}
+    <div id="delete_transaction-{{ item.id }}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="danger-header-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <form method="post" action="{% url 'dashboard:delete_items' %}">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <input type="hidden" name="daily_id" value="{{ instance.id }}">
+                    <input type="hidden" name="transactionID" value="{{ item.id }}">
+                    <div class="modal-header bg-danger">
+                        <h4 class="modal-title text-white" id="danger-header-modalLabel">Delete Daily Transaction</h4>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body bg-white">
+                        Are you sure?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger">Yes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endfor %}
-
-{% endblock  %}
-
-
-
+{% endblock %}
 
 {% block script %}
-
-    <script type="text/javascript">
-        window.onload = function() {
-            var startInput = document.getElementById("nepali-start-datepicker");
-            startInput.nepaliDatePicker({
-                dateFormat: "YYYY-MM-D (MMMM)"
-            });
-
-            var endInput = document.getElementById("nepali-end-datepicker");
-            endInput.nepaliDatePicker({
-                dateFormat: "YYYY-MM-D (MMMM)"
-            });
-
-
-           
-        };
-    </script>
-
-
-    
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            var mainInput = document.getElementById("nepali-date");
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Nepali Date Picker
+        var mainInput = document.getElementById("nepali-date");
+        if (mainInput) {
             mainInput.nepaliDatePicker({
                 dateFormat: "YYYY-MM-D (MMMM)",
                 closeOnDateSelect: true
             });
-        });
-    </script>
+        }
 
+        // Dynamic Field Addition
+        var addAnotherFieldButton = document.getElementById("addAnotherField");
+        var additionalFields = document.querySelector('.additional-fields');
+        var fieldCounter = {{ selectdata|length|default:1 }}; // Start counter from the current number of fields
 
-   
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var addAnotherFieldButton = document.getElementById("addAnotherField");
-            var additionalFields = document.querySelector('.additional-fields');
-            var fieldCounter = 1; // Counter to create unique field IDs
-    
+        if (addAnotherFieldButton) {
             addAnotherFieldButton.addEventListener("click", function() {
                 var newFields = `
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="product-${fieldCounter}" class="form-label">Product <span class="text-danger">*</span></label><br>
+                                <label for="product-${fieldCounter}" class="form-label">Product <span class="text-danger">*</span></label>
                                 <select class="form-control" id="product-${fieldCounter}" name="product_${fieldCounter}" required>
                                     {% for prod in products %}
-                                        <option value="{{ prod.id }}"
-                                            {% if prod.id == instane.product.id %}
-                                                selected
-                                            {% endif %}
-                                        >{{ prod.product_name }}</option>
+                                        <option value="{{ prod.id }}">{{ prod.product_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="quantity-${fieldCounter}" class="form-label">Quantity <span class="text-danger">*</span></label><br>
+                                <label for="quantity-${fieldCounter}" class="form-label">Quantity <span class="text-danger">*</span></label>
                                 <input class="form-control" id="quantity-${fieldCounter}" name="quantity_${fieldCounter}" type="number" step="0.1" min="0.1" placeholder="Enter Quantity" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="unite-${fieldCounter}" class="form-label">Unit <span class="text-danger">*</span></label><br>
+                                <label for="unite-${fieldCounter}" class="form-label">Unit <span class="text-danger">*</span></label>
                                 <select class="form-control" id="unite-${fieldCounter}" name="unite_${fieldCounter}" required>
                                     {% for unit in unites %}
-                                        <option value="{{ unit.id }}"
-                                            {% if unit.id == instane.unite.id %}
-                                                selected
-                                            {% endif %}
-                                        >{{ unit.unit_name }}</option>
+                                        <option value="{{ unit.id }}">{{ unit.unit_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
-                        
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                             <div class="mb-3">
-                                <label for="remarks-${fieldCounter}" class="form-label">Remarks <span class="text-danger">*</span></label><br>
+                                <label for="remarks-${fieldCounter}" class="form-label">Remarks <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="remarks-${fieldCounter}" name="remarks_${fieldCounter}" required></textarea>
                             </div>
                         </div>
@@ -347,10 +254,10 @@
                         </div>
                     </div>
                 `;
-    
                 additionalFields.insertAdjacentHTML('beforeend', newFields);
-                fieldCounter++; // Increment counter for the next set of fields
-    
+                fieldCounter++;
+
+                // Add event listener to remove buttons
                 var removeButtons = document.querySelectorAll('.removeField');
                 removeButtons.forEach(function(btn) {
                     btn.addEventListener('click', function(e) {
@@ -358,8 +265,7 @@
                     });
                 });
             });
-        });
-    </script>
-    
-    
+        }
+    });
+</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render,HttpResponse, HttpResponseRedirect,redirect,get_object_or_404
 from django.views import View
-from accounts.models import User
+from accounts.models import *
 from accounting.models import Daily,DailyTransaction
 from django.contrib.auth import authenticate, login, logout
 from . decorators import *
@@ -15,41 +15,13 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import *
 
+from products.models import Product
+
 
 def custom_404_view(request, exception):
     return render(request, 'app2/error.html')
 
-
-# def login(request):
-#     try:
-#         if request.user.is_authenticated:
-#             return render(request,'app2/index.html')
-#         if request.method =="POST":
-#             email = request.POST['useremail']
-#             print(email)
-#             password = request.POST['password']
-#             print(password)
-#             # user_obj = User.objects.filter(email=email)
-#             user_obj = authenticate(email=email, password=password)
-#             print(user_obj)
-#             if not user_obj: #not user_obj.exists():
-#                 messages.warning(request,"Invalid username and password...")
-#                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#             user_obj = authenticate(email=email, password=password)
-#             if user_obj and user_obj.is_superuser or user_obj.is_editor:
-#                 auth.login(request, user_obj)
-#                 return redirect('dashboard:index')
-#             messages.warning(request,'Inavlid Password')
-#             return redirect('dashboard:login')
-#         return render(request,'app2/login.html')
-#     except Exception as e:
-#         print(e)
-#         messages.warning(request,'something wrong...')
-#         return redirect('dashboard:login')
-
 from django.urls import reverse
-
-
 
 def login(request):
     try:
@@ -93,28 +65,12 @@ def index(request):
 
 
 
-# @login_required
-# def add_pick_up(request):
-#     if request.method =="POST":
-#         form =Pick_Up_PlanForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.info(request,"New Pick Detail Added Successfully !")
-#             return redirect("dashboard:index")
-#         else:
-#             print(form.errors)
-
-#     else:
-#         return redirect("dashboard:index")
-
-
 
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
-            # update_session_auth_hash(request, user)  # Important to update the session after password change
             messages.success(request, 'Your password was successfully updated!')
             return redirect('dashboard:logout')  # Redirect to the same view after successful password change
         else:
@@ -147,7 +103,6 @@ reset_password_complete = PasswordResetCompleteView.as_view(template_name='passw
 
 
 
-#news subcategorie
 @user_role_required('admin')
 def add_edit_Category(request, id=None):
     instance = None
@@ -203,56 +158,6 @@ def deleteCategory(request, id):
 
 
 
-#news subcategorie
-@user_role_required('admin')
-def add_edit_SubCategory(request, id=None):
-    instance = None
-    try:
-        if id:
-            instance = SubCategory.objects.get(pk=id)
-    except Exception as e:
-        messages.warning(request, 'An error occurred while retrieving the SubCategory.')
-        return redirect('dashboard:add_SubCategory')
-
-    if request.method == 'POST':
-        form = SubCategoryForm(request.POST, request.FILES, instance=instance)
-        if form.is_valid():
-            form.save()
-            if instance:  # Edit operation
-                messages.success(request, 'SubCategory edited successfully.')
-                return redirect('dashboard:edit_SubCategory', id=instance.id)  # Redirect to the edited SubCategory's details page
-            else:  # Add operation
-                messages.success(request, 'SubCategory added successfully.')
-                return redirect('dashboard:add_SubCategory')  # Redirect to the page for adding new SubCategorys
-        else:
-            messages.warning(request, 'Form is not valid. Please correct the errors.')
-    else:
-        form = SubCategoryForm(instance=instance)
-
-    context = {'form': form, 'instance': instance}
-    return render(request, 'app2/create_SubCategory.html', context)
-
-
-@user_role_required('admin')
-def SubCategories(request):
-    SubCategories=SubCategory.objects.all()
-    p=Paginator(SubCategories,4)
-    page_number= request.GET.get('page')
-    SubCategories=p.get_page(page_number)
-    return render(request, 'app2/SubCategory.html',{'details':SubCategories})
-
-
-@user_role_required('admin')
-def deleteSubCategory(request, id):
-    record = SubCategory.objects.get(pk=id)
-    if request.method == 'POST':
-        record.delete()
-        messages.success(request,'Sub Categorie Deleted Successfully !')
-        return redirect('dashboard:SubCategory')  # Redirect to a list view after deletion
-    else:
-        return render(request, 'app2/SubCategory.html', {'details': record})
-
-
 
 import json
 
@@ -306,14 +211,7 @@ def add_edit_Product(request, id=None):
         return redirect('dashboard:add_Product')
     
     # Populate subcategories_dict
-    subcategories_dict = {}
-    for category in Category.objects.all():
-        subcategories_dict[str(category.id)] = list(category.main_cateogry.values_list('id', 'sub_category_name'))
-
-# Convert UUID objects to strings before JSON serialization
-    subcategories_dict_serializable = {str(key): value for key, value in subcategories_dict.items()}
-    subcategories_json = json.dumps(subcategories_dict_serializable, cls=DjangoJSONEncoder)
-
+    
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
@@ -329,7 +227,7 @@ def add_edit_Product(request, id=None):
     else:
         form = ProductForm(instance=instance)
 
-    context = {'form': form, 'instance': instance, 'subcategories_json': subcategories_json}
+    context = {'form': form, 'instance': instance}
     
     return render(request, 'app2/create_Product.html', context)
 
@@ -346,7 +244,7 @@ def add_edit_Product(request, id=None):
 @user_role_required('admin')
 def Products(request):
     Products=Product.objects.all()
-    p=Paginator(Products,4)
+    p=Paginator(Products,10)
     page_number= request.GET.get('page')
     Products=p.get_page(page_number)
     return render(request, 'app2/Product.html',{'details':Products})
@@ -742,13 +640,17 @@ def invoice1(request, id):
 @all_users_required
 def OrderDetail(request, id):
     order = get_object_or_404(Order, id=id)
-    shipping_details = order.address
-    template_path = "app2/invoice.html"
-    context = {'order': order, 'Shipping': shipping_details}
+    order_items = order.items.all()  # Fetch related order items
 
-  
-    return render(request,'app2/orderDetail.html', context)
-    
+    shipping_details = order.address
+    context = {
+        'order': order,
+        'items': order_items,  # Ensure items are passed to the template
+        'Shipping': shipping_details
+    }
+
+    return render(request, 'app2/orderDetail.html', context)
+
     
 @method_decorator(all_users_required, name='dispatch')
 class deliveredorder_listDeleteView(View):
@@ -785,6 +687,43 @@ def update_order_list(request, id):
 
 
 @method_decorator(user_role_required('admin'), name='dispatch')
+# class DriverView(View):
+#     template_name = 'app2/create_Driver.html'
+
+#     def get_instance(self, id):
+#         try:
+#             return User.objects.get(pk=id)
+#         except User.DoesNotExist as e:
+#             return None
+
+#     def get(self, request, id=None):
+#         instance = self.get_instance(id)
+#         form = AgentRegistrationForm(instance=instance)
+#         context = {'form': form, 'instance': instance}
+#         return render(request, self.template_name, context)
+
+#     def post(self, request, id=None):
+#         instance = self.get_instance(id)
+#         form = AgentRegistrationForm(request.POST, request.FILES, instance=instance)
+
+#         if form.is_valid():
+#             agent=form.save(commit=False)
+#             agent.is_agent=True
+#             agent.save()
+#             if instance:  # Edit operation
+#                 messages.success(request, 'Driver edited successfully.')
+#                 return redirect('dashboard:edit_Driver', id=instance.id)
+#             else:  # Add operation
+#                 messages.success(request, 'Driver added successfully.')
+#                 return redirect('dashboard:add_Driver')
+#         else:
+#             messages.warning(request, 'Email is already taken . Please correct the errors.')
+
+#         context = {'form': form, 'instance': instance}
+#         return render(request, self.template_name, context)
+
+
+
 class DriverView(View):
     template_name = 'app2/create_Driver.html'
 
@@ -796,17 +735,17 @@ class DriverView(View):
 
     def get(self, request, id=None):
         instance = self.get_instance(id)
-        form = UserForm(instance=instance)
+        form = AgentRegistrationForm(instance=instance)
         context = {'form': form, 'instance': instance}
         return render(request, self.template_name, context)
 
     def post(self, request, id=None):
         instance = self.get_instance(id)
-        form = UserForm(request.POST, request.FILES, instance=instance)
+        form = AgentRegistrationForm(request.POST, request.FILES, instance=instance)
 
         if form.is_valid():
-            agent=form.save(commit=False)
-            agent.is_agent=True
+            agent = form.save(commit=False)
+            agent.is_agent = True
             agent.save()
             if instance:  # Edit operation
                 messages.success(request, 'Driver edited successfully.')
@@ -815,7 +754,7 @@ class DriverView(View):
                 messages.success(request, 'Driver added successfully.')
                 return redirect('dashboard:add_Driver')
         else:
-            messages.warning(request, 'Email is already taken . Please correct the errors.')
+            messages.warning(request, form.errors)
 
         context = {'form': form, 'instance': instance}
         return render(request, self.template_name, context)
@@ -833,13 +772,13 @@ class SubAdminView(View):
 
     def get(self, request, id=None):
         instance = self.get_instance(id)
-        form = UserForm(instance=instance)
+        form = AgentRegistrationForm(instance=instance)
         context = {'form': form, 'instance': instance}
         return render(request, self.template_name, context)
 
     def post(self, request, id=None):
         instance = self.get_instance(id)
-        form = UserForm(request.POST, request.FILES, instance=instance)
+        form = AgentRegistrationForm(request.POST, request.FILES, instance=instance)
 
         if form.is_valid():
             agent=form.save(commit=False)
@@ -888,7 +827,50 @@ class DriverDeleteView(View):
 
         return redirect('dashboard:Driver')
     
-    
+
+
+# =====================
+# ====== USer =========
+@method_decorator(user_role_required('admin'), name='dispatch')  
+class UserAdd(View):
+    template_name = 'app2/user_add.html'  # Ensure you have this template
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        try:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            phone = request.POST.get('phone')
+            image = request.FILES.get('image')  
+            address = request.POST.get('address')
+            is_user = request.POST.get('isUser') == 'on'  # Convert checkbox value to boolean
+            activated = request.POST.get('activated') == 'on'
+
+            # Check if email exists
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "Email already exists")
+                return redirect('dashboard:add_user')  # Ensure this URL is correctly defined in urls.py
+
+            # Create user
+            user = User.objects.create(
+                name=name,
+                email=email,
+                phone_no=phone,
+                image=image,
+                address=address,
+                is_user=is_user,
+                activate=activated
+            )
+            messages.success(request, "User added successfully!")
+            return redirect('dashboard:user_list')  # Redirect to user list page
+        except Exception as e:
+            print(e)
+            messages.error(request, "An error occurred while adding the user.")
+            return redirect('dashboard:add_user')
+        
+        
 
 @method_decorator(user_role_required('admin'), name='dispatch')  
 class UserListView(View):
@@ -901,6 +883,36 @@ class UserListView(View):
         page_number = request.GET.get('page')
         prod_page = paginator.get_page(page_number)
         return render(request, self.template_name, {'details': prod_page})
+    
+    
+@method_decorator(user_role_required('admin'), name='dispatch')
+class SubAdminListView(View):
+    template_name = 'app2/SubAdmin.html'
+    paginate_by = 10
+
+    def get(self, request):
+        prod = User.objects.filter(is_sub_admin=True)
+        paginator = Paginator(prod, self.paginate_by)
+        page_number = request.GET.get('page')
+        prod_page = paginator.get_page(page_number)
+        return render(request, self.template_name, {'details': prod_page})
+    
+    
+    
+@method_decorator(user_role_required('admin'), name='dispatch')
+class SubAdminDeleteView(View):
+    template_name = 'app2/SubAdmin.html'
+
+    def get(self, request, id):
+        record = get_object_or_404(User, id=id)
+        return render(request, self.template_name, {'details': record})
+
+    def post(self, request, id):
+        record = get_object_or_404(User, id=id)
+        record.delete()
+        messages.success(request, 'User deleted successfully.')
+
+        return redirect('dashboard:SubAdmin')
     
 @method_decorator(user_role_required('admin'), name='dispatch')
 class UserDeleteView(View):
@@ -916,7 +928,7 @@ class UserDeleteView(View):
         messages.success(request, 'User deleted successfully.')
 
         return redirect('dashboard:User')
-    
+
 
 
 @user_role_required('admin')
@@ -952,93 +964,148 @@ def aboutUs(request):
 
 
 
-#news subcategorie
-# @user_role_required('admin')
-# def add_edit_Order(request, id=None):
-#     instance = None
-#     try:
-#         if id:
-#             instance = Order.objects.get(pk=id)
-#     except Exception as e:
-#         messages.warning(request, 'An error occurred while retrieving the Order.')
-#         return redirect('dashboard:add_Order')
-
-#     if request.method == 'POST':
-#         form = OrderForm(request.POST, request.FILES, instance=instance)
-#         if form.is_valid():
-#             form.save()
-#             if instance:  # Edit operation
-#                 messages.success(request, 'Order edited successfully.')
-#                 return redirect('dashboard:edit_Order', id=instance.id)  # Redirect to the edited Order's details page
-#             else:  # Add operation
-#                 messages.success(request, 'Order added successfully.')
-#                 return redirect('dashboard:add_Order')  # Redirect to the page for adding new Orders
-#         else:
-#             messages.warning(request, 'Form is not valid. Please correct the errors.')
-#     else:
-#         form = OrderForm(instance=instance)
-
-#     context = {'form': form, 'instance': instance}
-#     return render(request, 'app2/create_Order.html', context)
-
-
-    
     
 from django.forms import inlineformset_factory
+
+
+def stock_update_create( order_instance):
+    print("order_instance:",order_instance)
+    if order_instance.order_status == 'received':
+        for order_item in order_instance.items.all():
+            product = order_item.product
+            quantity = order_item.quantity
+
+            stock, created = Stock.objects.get_or_create(product=product)
+
+            if order_instance.id:  
+                stock.quantity -= order_item.quantity
+            else:
+                stock.quantity += quantity
+
+            # Save the stock
+            stock.save()
+
+
 
 
 def create_Order(request, id=None):
     products = Product.objects.all()
     units = Unit.objects.all()
-    if id:
-        news_instance = get_object_or_404(Order, id=id)
-    else:
-        news_instance = Order()
-
     
-    NewsVideoFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1)
+    if id:
+        order_instance = get_object_or_404(Order, id=id)
+    else:
+        order_instance = Order()
+
+    # Set extra=0 to prevent empty forms when editing
+    OrderItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=0)
 
     if request.method == 'POST':
-        news_form = OrderForm(request.POST, request.FILES, instance=news_instance)
-        formset = NewsVideoFormSet(request.POST, request.FILES, instance=news_instance)
+        # Check if the "Calculate Total Price" button was clicked
+        calculate_total = 'calculate_total' in request.POST
 
-        if news_form.is_valid() and formset.is_valid():
-            news_form.save()
-            formset.save()
+        order_form = OrderForm(request.POST, request.FILES, instance=order_instance)
+        formset = OrderItemFormSet(request.POST, request.FILES, instance=order_instance)
 
-            if id:
-                messages.success(request, 'Order updated successfully.')
-                return redirect('dashboard:edit_Order', id=news_instance.id)
-            else:
-                messages.success(request, 'Order created successfully.')
-                return redirect('dashboard:add_Order')
+        if order_form.is_valid() and formset.is_valid():
+            # Save the order instance first
+            order_instance = order_form.save(commit=False)
 
-        messages.warning(request, news_form.errors)
+            # Save the formset (order items)
+            order_items = formset.save(commit=False)
+
+            # Calculate the total price based on product rate and quantity
+            total_price = 0
+            for item in order_items:
+                product = item.product
+                quantity = item.quantity
+                item.price = product.rate  # Set the price from the product rate
+                total_price += product.rate * quantity
+                
+               
+
+            # Save the total price to the order instance
+            order_instance.totalPrice = total_price
+
+            # If the "Calculate Total Price" button was clicked, don't save the order yet
+            if not calculate_total:
+                order_instance.save()
+                formset.save()
+
+                if id:
+                    messages.success(request, 'Order updated successfully.')
+                else:
+                    messages.success(request, 'Order created successfully.')
+                return redirect('dashboard:edit_Order', id=order_instance.id)
+
+        # If only calculating the total price, don't save the order
+        if calculate_total:
+            messages.info(request, f'Total Price Calculated: {total_price}')
+        else:
+            messages.warning(request, order_form.errors)
     else:
-        news_form = OrderForm(instance=news_instance)
-        formset = NewsVideoFormSet(instance=news_instance)
+        order_form = OrderForm(instance=order_instance)
+        formset = OrderItemFormSet(instance=order_instance)
+
+    # Calculate total price for the template
+    total_price = order_instance.totalPrice if order_instance.pk else 0
 
     context = {
-        'form': news_form,
+        'form': order_form,
         'formset': formset,
         'is_inline_formset_used': True,
-        'instance': news_instance,
+        'instance': order_instance,
         'products': products,
-        'units':units
+        'units': units,
+        'total_price': total_price,  # Pass total price to the template
     }
 
     return render(request, 'app2/create_Order.html', context)
+#     # ======= Calculate price  in  Create Order ===========
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.authentication import SessionAuthentication
+# class CalculatePrice(APIView):
+#     authentication_classes=[SessionAuthentication]
+    
+#     def get(self,request):
+#         try:
+#             product=request.data.get('product')
+#             quantity=request.data.get('quantity')
+#             product_obj=Product.objects.get(product_name=product)
+#             total_price=product_obj.rate*quantity
+#             return Response({'total_price':total_price},status=200)
+#         except Product.DoesNotExist:
+#             return Response({'error':'Product not found'},status=400)
+#         except Exception as e:
+#             return Response({error':str(e)},status=400)
+    
 
 
 
 from django.db.models import Sum
+
+# ======== accounting ========
 def accounting(request):
-    orders =Order.objects.exclude(order_status ='pending')
+    # Accounting Data
+    orders = Order.objects.exclude(order_status='pending')
     
-    return render(request,'app2/accounting.html',{'orders':orders,
-                                                  })
+    # Cashbook Data
+    today = nepali_datetime.date.today()
+    enddate = today + timedelta(days=1)
+    dailytrasactions_list = Daily.objects.all()
+    grand_total = dailytrasactions_list.aggregate(Sum('total'))['total__sum']
 
-
+    # Combine data into a single context
+    context = {
+        'orders': orders,
+        'dailytrasactions_list': dailytrasactions_list,
+        'today': today,
+        'enddate': enddate,
+        'grand_total': grand_total,
+    }
+    return render(request, 'app2/accounting.html', context)
+    
 def invoice(request,order_id=None):
     order_detail =Order.objects.get(id=order_id)
     print(order_detail)
@@ -1052,16 +1119,7 @@ import nepali_datetime
 from django.utils import timezone
 from datetime import datetime,timedelta
 
-def cashbook(request):
-    today  = nepali_datetime.date.today()
-    enddate=today + timedelta(days=1)
-    dailytrasactions_list = Daily.objects.all()
-    grand_total = dailytrasactions_list.aggregate(Sum('total'))['total__sum']
-    return render(request,'app2/dailytransaction.html',{'dailytrasactions_list':dailytrasactions_list, 
-                                                        'today':today,
-                                                        'enddate':enddate,
-                                                        'grand_total':grand_total
-                                                        })
+
 from nepali_datetime import date
 
 nepali_month_mapping = {
@@ -1078,6 +1136,11 @@ nepali_month_mapping = {
     'Falgun': 11,
     'Chaitra': 12,
 }
+
+
+
+
+
 
 @login_required
 def dailytransaction(request, id=None):
@@ -1157,6 +1220,7 @@ def dailytransaction(request, id=None):
                     fields['unite'] = unite_instance
                     
                     DailyTransaction.objects.create(**fields)
+                            
 
             except Exception as e:
                 print(e)
@@ -1231,9 +1295,9 @@ def delete_transaction(request):
         transaction_obje = Daily.objects.get(id= id)
         transaction_obje.delete()
         messages.info(request,"Deleted Successfully !")
-        return redirect('dashboard:cashbook')
+        return redirect('dashboard:accounting')
     else:
-        return redirect('dashboard:cashbook')
+        return redirect('dashboard:accounting')
 
 
 @login_required
@@ -1278,7 +1342,6 @@ def edite_dailytransaction(request, id= None):
         today = nepali_date.strftime("%d-%B-%Y")
         daily_instance.nepali_date = today
         daily_instance.save()
-        # Handling form data
         transaction_ids = request.POST.getlist('transaction_id')
 
         for transaction_id in transaction_ids:
@@ -1318,6 +1381,7 @@ def edite_dailytransaction(request, id= None):
 
 
 
+
 @user_role_required('admin')
 def add_edit_Pick_Up_Plan(request, id=None):
     instance = None
@@ -1336,10 +1400,10 @@ def add_edit_Pick_Up_Plan(request, id=None):
             form.save()
             if instance:  # Edit operation
                 messages.success(request, 'Pick_Up_Plan edited successfully.')
-                return redirect('dashboard:edit_Pick_Up_Plan', id=instance.id)  # Redirect to the edited Pick_Up_Plan's details page
+                return redirect('dashboard:pick_up_plans')  # Redirect to the edited Pick_Up_Plan's details page
             else:  # Add operation
                 messages.success(request, 'Pick_Up_Plan added successfully.')
-                return redirect('dashboard:add_Pick_Up_Plan')  # Redirect to the page for adding new Pick_Up_Plans
+                return redirect('dashboard:pick_up_plans')  # Redirect to the page for adding new Pick_Up_Plans
         else:
             messages.warning(request, 'Form is not valid. Please correct the errors.')
     else:
@@ -1349,10 +1413,9 @@ def add_edit_Pick_Up_Plan(request, id=None):
     return render(request, 'app2/create_Pick_Up_Plan.html', context)
 
 @user_role_required('admin')
-def Pick_Up_Plans(request):
+def pick_Up_plans(request):
     Pick_Up_Plans=Pick_Up_Plan.objects.all()
-
-    return render(request, 'app2/index.html',{'details':Pick_Up_Plans})
+    return render(request, 'app2/pick_plan.html',{'details':Pick_Up_Plans})
 
 
 @user_role_required('admin')
@@ -1360,10 +1423,461 @@ def deletePick_Up_Plan(request, id):
     record = Pick_Up_Plan.objects.get(pk=id)
     if request.method == 'POST':
         record.delete()
-        messages.success(request,'Sub Categorie Deleted Successfully !')
-        return redirect('dashboard:index')  # Redirect to a list view after deletion
+        messages.success(request,'Deleted Successfully !')
+        return redirect('dashboard:pick_up_plans')
     else:
-        return render(request, 'app2/index.html', {'details': record})
+        return redirect('dashboard:index')
     
     
+    
+# ====== Inventory ========
+
+def inventory(request):
+   
+    products = Stock.objects.all()
+    return render(request,'app2/stock.html',{'products':products})
+
+
+def inventory_add(request):
+    products= Product.objects.all()
+    if request.method=="POST":
+        product_name=request.POST.get('product_name')
+        product_obj=Product.objects.get(product_name=product_name)
+        quantity=request.POST.get('quantity')
+        sold_quantity=request.POST.get('sold_quantity')
+        stock_obj=Stock.objects.create(product=product_obj,quantity=quantity,sold_quantity=sold_quantity)
+        messages.success(request,"Inventory added successfully")
+        return redirect('/inventory')
+        
+        
+    
+    
+    return render(request,'app2/stockAdd.html',{'products':products})
+    
+    
+
+def edit_inventory(request,id):
+    stocK_obj=Stock.objects.get(id=id)
+    if request.method=="POST":
+        quantity=request.POST.get('quantity')
+        sold_quantity=request.POST.get('sold_quantity')
+        stocK_obj.quantity=float(quantity)
+        stocK_obj.sold_quantity=float(sold_quantity)
+        stocK_obj.save()
+        messages.success(request,'Inventory updated succesfully')
+        return  redirect('/inventory')
+    return render(request, 'app2/stockEdit.html', {'stock_item': stocK_obj})
+        
+        
+        
+        
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+def sales(request):
+    items_per_page = 10  
+    sales_list = Invoice.objects.all()
+    paginator = Paginator(sales_list, items_per_page)
+    page = request.GET.get('page')
+
+    try:
+        sales = paginator.page(page)
+    except PageNotAnInteger:
+        sales = paginator.page(1)
+    except EmptyPage:
+        sales = paginator.page(paginator.num_pages)
+
+    total_amount = sales_list.aggregate(total_cost=Sum('total'))['total_cost'] or 0
+    total_sales= sales_list.count()
+    return render(request,'app2/sales_table.html',{'sales':sales,'total_sales':total_sales,'total_amount':total_amount})
+
+    
+    
+def create_sales(request):
+    product = Product.objects.all()
+    customer = Customers.objects.all()
+    return render(request,'app2/sales.html',{'products':product,'customers':customer})
+
+def sales_details(request, id=None):
+    sales_instance = Invoice.objects.get(id=id)
+    return render(request, 'app2/sales_detail.html',{'sales_instance':sales_instance})
+
+def sales_invoice(request,id=None):
+    sales_instance = Invoice.objects.get(id=id)
+    return render(request, 'app2/sales_invoice.html',{'sales_instance':sales_instance})
+    
+def get_product(request):
+    resp = {'status':'failed','data':{},'msg':''}
+    pk= request.GET.get('pk')
+    print(pk)
+    if pk is None:
+        resp['msg'] = 'Product ID is not recognized'
+    else:
+        product = Product.objects.get(id = pk)
+        # Invoice_Item.objects.create(product=product)
+        resp['data']['product'] = str(product.product_name)
+        resp['data']['unit'] = str(product.unit)
+        resp['data']['id'] = str(product.id)
+        resp['data']['price'] = product.rate
+        resp['status'] = 'success'
+    return HttpResponse(json.dumps(resp),content_type="application/json")
+
+
+def save_sales(request):
+    resp = {'status':'failed', 'msg' : ''}
+    id = 2
+    if request.method == 'POST':
+        pids = request.POST.getlist('pid[]')
+        cus_id=request.POST['customer']
+        print(cus_id)
+        print(request.POST['total'])
+        customer=Customers.objects.get(id=cus_id)
+        # invoice_form = SaveInvoice(request.POST)
+        invoice_instance= Invoice.objects.create(customer=customer,total=request.POST['total'])
+        print(request.POST)
+        if invoice_instance:
+            invoice = Invoice.objects.first()
+            for pid in pids:
+                data = {
+                    'invoice':invoice.id,
+                    'product':Product.objects.get(id=pid).id,
+                    'quantity':request.POST['quantity['+str(pid)+']'],
+                    'price':request.POST['price['+str(pid)+']'],
+                }
+                print(data)
+                ii_form = SaveInvoiceItem(data=data)
+                if ii_form.is_valid():
+                    ii_form.save()
+                else:
+                    print(ii_form.errors)
+                    for fields in ii_form:
+                        for error in fields.errors:
+                            resp['msg'] += str(error + "<br>")
+                    break
+            messages.success(request, "Sale Transaction has been saved.")
+            resp['status'] = 'success'
+            # invoice.delete()
+        else:
+            
+            for error in fields.errors:
+                resp['msg'] += str(error + "<br>")
+
+    return HttpResponse(json.dumps(resp),content_type="application/json")
+    
+    
+    
+    
+
+
+
+
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request,'Profile Updated Successfully !')
+            return redirect('dashboard:edit_profile')  # Redirect to the profile page after saving
+        
+        
+        else:
+            messages.warning(request,form.errors)
+    else:
+        form = UserProfileForm(instance=user)
+    return render(request, 'app2/updateProfile.html', {'form': form})
+
+
+
+
+@method_decorator(user_role_required('admin'), name='dispatch')
+class UpdateSubAdminView(View):
+    template_name = 'app2/edit_subadmin.html'
+
+    def get_instance(self, id):
+        try:
+            return User.objects.get(pk=id)
+        except User.DoesNotExist as e:
+            return None
+
+    def get(self, request, id=None):
+        instance = self.get_instance(id)
+        form = UserProfileForm(instance=instance)
+        context = {'form': form, 'instance': instance}
+        return render(request, self.template_name, context)
+
+    def post(self, request, id=None):
+        instance = self.get_instance(id)
+        form = UserProfileForm(request.POST, request.FILES, instance=instance)
+
+        if form.is_valid():
+            agent=form.save(commit=False)
+            agent.is_sub_admin=True
+            agent.save()
+            if instance:  # Edit operation
+                messages.success(request, 'Sub Admin edited successfully.')
+                return redirect('dashboard:edit_Sub_Admin', id=instance.id)
+            else:  # Add operation
+                messages.success(request, 'SubAdmin added successfully.')
+                return redirect('dashboard:add_SubAdmin')
+        else:
+            messages.warning(request, form.errors)
+
+        context = {'form': form, 'instance': instance}
+        return render(request, self.template_name, context)
+    
+
+
+
+
+@method_decorator(user_role_required('admin'), name='dispatch')
+class UpdateAgentView(View):
+    template_name = 'app2/edit_agent.html'
+
+    def get_instance(self, id):
+        try:
+            return User.objects.get(pk=id)
+        except User.DoesNotExist as e:
+            return None
+
+    def get(self, request, id=None):
+        instance = self.get_instance(id)
+        form = UserProfileForm(instance=instance)
+        context = {'form': form, 'instance': instance}
+        return render(request, self.template_name, context)
+
+    def post(self, request, id=None):
+        instance = self.get_instance(id)
+        form = UserProfileForm(request.POST, request.FILES, instance=instance)
+
+        if form.is_valid():
+            agent=form.save(commit=False)
+            agent.is_agent=True
+            agent.save()
+            if instance:  # Edit operation
+                messages.success(request, 'Agent edited successfully.')
+                return redirect('dashboard:update_agent', id=instance.id)
+            else:  # Add operation
+                messages.success(request, 'Agent added successfully.')
+                return redirect('dashboard:add_agent')
+        else:
+            messages.warning(request, form.errors)
+
+        context = {'form': form, 'instance': instance}
+        return render(request, self.template_name, context)
+        
+        
+        
+
+def privacy(request):
+    privacy=PrivacyPolicy.objects.first()
+    return render(request, 'app2/privacypolicy.html',{'privacy':privacy})
+    
+    
+
+#news subcategorie
+@user_role_required('admin')
+def add_edit_Customers(request, id=None):
+    instance = None
+    try:
+        if id:
+            instance = Customers.objects.get(pk=id)
+    except Exception as e:
+        messages.warning(request, 'An error occurred while retrieving the suppliers.')
+        return redirect('dashboard:add_Customers')
+
+    if request.method == 'POST':
+        form = CustomersForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            if instance:  # Edit operation
+                messages.success(request, 'supplier edited successfully.')
+                return redirect('dashboard:edit_Customers', id=instance.id)  # Redirect to the edited Customers's details page
+            else:  # Add operation
+                messages.success(request, 'supplier added successfully.')
+                return redirect('dashboard:add_Customers')  # Redirect to the page for adding new Customerss
+        else:
+            messages.warning(request, 'Form is not valid. Please correct the errors.')
+    else:
+        form = CustomersForm(instance=instance)
+
+    context = {'form': form, 'instance': instance}
+    return render(request, 'app2/create_Customers.html', context)
+
+@user_role_required('admin')
+def Customerss(request):
+    if request.method =="POST":
+        company_name= request.POST.get('company_name')
+        print(company_name)
+        owner_name= request.POST.get('owner_name')
+        address= request.POST.get('address')
+        phone_number = request.POST.get('phone_number')
+        customers = Customers.objects.all()
+        if company_name:
+            customers = customers.filter(companyName__icontains=company_name)
+        if owner_name:
+            customers = customers.filter(ownerName__icontains=owner_name)
+        if address:
+            customers = customers.filter(address__icontains=address)
+        if phone_number:
+            customers = customers.filter(phoneNo__icontains=phone_number)
+        print(customers)
+        return render(request, 'app2/Customers.html',{'details':customers})
+    else:
+        Customerss=Customers.objects.all()
+        # p=Paginator(Customerss,10)
+        # page_number= request.GET.get('page')
+        # Customerss=p.get_page(page_number)
+        return render(request, 'app2/Customers.html',{'details':Customerss})
+
+
+@user_role_required('admin')
+def deleteCustomers(request, id):
+    record = Customers.objects.get(pk=id)
+    if request.method == 'POST':
+        record.delete()
+        messages.success(request,'suppliers Deleted Successfully !')
+        return redirect('dashboard:Customers')  # Redirect to a list view after deletion
+    else:
+        return render(request, 'app2/Customers.html', {'details': record})
+    
+    
+
+def customer_invoices(request, customer_id):
+    customer = get_object_or_404(Customers, pk=customer_id)
+    invoices = Invoice.objects.filter(customer=customer)
+
+
+    # Pagination
+    paginator = Paginator(invoices, 10)  # Show 10 invoices per page
+    page = request.GET.get('page')
+    try:
+        invoices = paginator.page(page)
+    except PageNotAnInteger:
+        invoices = paginator.page(1)
+    except EmptyPage:
+        invoices = paginator.page(paginator.num_pages)
+
+    return render(request, 'app2/Customers_sales_detail.html', {'customer': customer, 'invoices': invoices})
+    
+    
+
+''' export file in excel csv and pdf '''
+import csv
+import xlsxwriter
+from django.http import HttpResponse
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from .models import Customers
+
+@login_required
+def export_data(request, format):
+    data = Customers.objects.all()
+
+    if format == 'excel':
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="suppliers.xlsx"'
+        workbook = xlsxwriter.Workbook(response)
+        worksheet = workbook.add_worksheet()
+
+        headers = ['Company Name', 'Owner Name', 'Address','Phone Number'] 
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header)
+
+        for row, obj in enumerate(data, start=1):
+            worksheet.write(row, 0, obj.companyName)  
+            worksheet.write(row, 1, obj.ownerName)
+            worksheet.write(row, 2, obj.address)
+            worksheet.write(row, 3, obj.phoneNo)
+
+
+        workbook.close()
+        
+
+    elif format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="suppliers.csv"'
+        writer = csv.writer(response)
+
+        headers = ['Company Name', 'Owner Name', 'Address','Phone Number'] 
+        writer.writerow(headers)
+
+        for obj in data:
+            writer.writerow([obj.companyName, obj.ownerName, obj.address,obj.phoneNo]) 
+        
+    elif format == 'pdf':
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="suppliers.pdf"'
+
+        doc = SimpleDocTemplate(response, pagesize=letter)
+        table_data = []
+        headers = ['Company Name', 'Owner Name', 'Address', 'Phone Number']
+        table_data.append(headers)
+
+        for obj in data:
+            row = [obj.companyName, obj.ownerName, obj.address, obj.phoneNo]
+            table_data.append(row)
+
+        table_style = TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                                  ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                                  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                                  ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                                  ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                                  ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                                  ('GRID', (0, 0), (-1, -1), 1, colors.black)])
+        table = Table(table_data)
+        table.setStyle(table_style)
+
+        doc.build([table])
+
+        return response
+
+    else:
+        return HttpResponse("Invalid format")
+
+    return response
+    
+
+''' reward points'''
+@login_required
+def rewards_create_or_update(request):
+    instance = Reward.objects.all().first()
+    user_rewards = UserReward.objects.all()
+    if request.method =="POST":
+        forms = RewardForm(request.POST, instance=instance)
+        if forms.is_valid():
+            forms.save()
+            messages.success(request,"Update Successfully !")
+        else:
+            print(forms.errors)
+   
+    forms = RewardForm(instance=instance)
+    return render(request, 'app2/rewards.html',{'forms':forms,'customers_rewards':user_rewards})
+
+@login_required
+def user_reward_update(request, id = None):
+    user_instance = get_object_or_404(User, id=id)
+
+    if request.method == "POST":
+        user_reward_form = UserRewardForm(request.POST, instance=user_instance)
+
+        if user_reward_form.is_valid():
+            user_reward_form.save()
+            messages.success(request, 'Update Successfully !')
+
+    else:
+        user_reward_form = UserRewardForm(instance=user_instance)
+
+    return render(request, "app2/user_reward_form.html", {'user_reward_form': user_reward_form})
+
+''' user order history'''
+@login_required
+def user_order_history(request,id=None):
+    user_orders = Order.objects.filter(user= id)
+    user_reward = UserReward.objects.filter(user = id).first()
+    return render(request,'app2/user_order_histroy.html',{'user_orders':user_orders,'user_reward':user_reward})
+
     

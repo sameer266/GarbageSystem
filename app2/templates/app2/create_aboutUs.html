@@ -68,14 +68,18 @@
                                                         <input type="email" name=" {{ form.email.name }}  " id="{{ form.email.id_for_label }}" class="form-control" required
                                                                value="{% if instance %}{{ instance.email }}{% endif %}" placeholder="Enter email">
                                                     </div>
-                                                </div>
-                                                    <div class="col-xl-6">
 
+                                                    
                                                     <div class="mb-3">
                                                         <label for="{{ form.contactNo.id_for_label }}" class="form-label">ContactNo:</label>
                                                         <input type="tel" name=" {{ form.contactNo.name }}  " id="{{ form.contactNo.id_for_label }}" class="form-control" required
-                                                               value="{% if instance %}{{ instance.contactNo }}{% endif %}" placeholder="Enter contactNo">
+                                                               value="{% if instance %}{{ instance.contactNo }}{% endif %}" placeholder="Enter contactNo"     pattern="[0-9]{10}" title="Please enter exactly 10 numeric characters">
+                                                         
+
                                                     </div>
+                                                </div>
+                                                    <div class="col-xl-6">
+
                                                     
                                                     <div class="mb-3 mt-3 mt-xl-0 " >
                                                         <label for="{{ form.logo.id_for_label }}" class="form-label">image:</label>

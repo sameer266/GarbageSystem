@@ -95,29 +95,22 @@ Delivered orderList
                                                     {% csrf_token %}
                                                     <input type="hidden" name="id" value="{{ item.orders.id }}">
                                                     
-                                                   <select onchange="form.submit()" name="driver" class="rounded form-control" readonly >
-                                                       {% if request.user.is_agent%}
-                                                          <option value="{{ request.user.id }}" selected  >{{ request.user.name }}</option>
-          
-                                                       {%else%}
-                                                       <option value="" selected disabled>---Select Agent---</option>
+                                                   <select disabled onchange="form.submit()" name="driver" class="rounded form-control" readonly >
+                                                     
           
                                                           {% for user in agent %}
                                                           {% if user.id == item.driver.id %}
                                                              <option value="{{ user.id }}" {% if user.id == item.driver.id %}selected {% endif %} >{{ user.name }}</option>
                                                           {% endif %}
-                                                          <option value="{{ user.id }}"  >{{ user.name }}</option>
-          
-                                                             {% endfor %}
-                                                       {%endif%}
+                                                         
+                                                       {%endfor%}
                                                    
                                                    </select>
                                             </td>
                                             <td>
                                                 <input type="hidden" name="id" value="{{ item.orders.id }}">
 
-                                                {% comment %} {{item.order_status}} {% endcomment %}
-                                                <select onchange="form.submit()" name="order_status" class="rounded form-control" {% if item.order_status == 'received' and request.user.is_agent %}disabled{% endif %}>
+                                                <select disabled onchange="form.submit()" name="order_status" class="rounded form-control" {% if item.order_status == 'received' and request.user.is_agent %}disabled{% endif %}>
                                                     {%if request.user.is_admin %}<option value="pending" {% if item.order_status == 'pending' %}selected{% endif %} {% if item.order_status == 'rdp' %}disabled{% endif%}{% if item.order_status == 'accept' %} disabled {% endif %}{% if item.order_status == 'received' %}disabled{% endif %}>Pending</option>{%endif%}
                                                     <option value="accept" {% if item.order_status == 'accept' %} selected {% endif %} {% if item.order_status == 'rdp' %}disabled{% endif%} {% if item.order_status == 'received' %}disabled{% endif %} > Accept</option>
                                                     <option value="rdp" {% if item.order_status == 'rdp' %}selected{% endif %} {% if item.order_status == 'received' %}disabled{% endif %}>Ready To Pick Up</option>

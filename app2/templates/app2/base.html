@@ -1,7 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <title>Garbbage | 
+    <title>Nepal Recycle Bank | 
   
         {% block title  %}
     
@@ -10,8 +10,8 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
-        <meta content="Coderthemes" name="author" />
+        <meta content="A fully features Nepal Recycle Bank CRM. " name="description" />
+        <meta content="Nepal Recycle Bank" name="author" />
 
         <!-- Plugin css -->
         <link rel="stylesheet" href="{% static 'app2/assets/vendor/jquery-toast-plugin/jquery.toast.min.css'%}">
@@ -46,6 +46,10 @@
 
         <!-- Icons css -->
         <link href="{% static 'app2/assets/css/icons.min.css'%}" rel="stylesheet" type="text/css" />
+
+
+        <!--  Font  awesome icon -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
         {% block load_css %}
@@ -154,6 +158,11 @@
                                 <div class=" dropdown-header noti-title">
                                     <h6 class="text-overflow m-0"> {{request.user.fullname}}</h6>
                                 </div>
+                                
+                                      <a href="{% url 'dashboard:edit_profile' %}" class="dropdown-item">
+                                    <i class="mdi mdi-account-circle me-1"></i>
+                                    <span>Update Profile</span>
+                                </a>
                                 <a href="{% url 'dashboard:change_password' %}" class="dropdown-item">
                                     <i class="mdi mdi-account-edit me-1"></i>
                                     <span>Change Password</span>
@@ -178,7 +187,7 @@
                 <!-- Brand Logo Light -->
                 <a href="{% url 'dashboard:index' %}" class="logo logo-light">
                     <span class="logo-lg">
-                        <img src="{{company.logo.url}}" alt="logo" style="height: 40px;">
+                        <img src="{{company.logo.url}}" alt="logo" style="height: 64px;">
                     </span>
                     <span class="logo-sm">
                         <img src="{{company.logo.url}}" alt="small logo">
@@ -234,9 +243,7 @@
                           <li>
                                         <a href="{% url 'dashboard:Category' %}">Main Category</a>
                                     </li>
-                                    <li>
-                                        <a href="{% url 'dashboard:SubCategory' %}"> Sub-Category</a>
-                                    </li>
+                                    
                                     {% comment %} <li>
                                         <a href="{% url  'dashboard:create_news' %}">Add News</a>
                                     </li>
@@ -270,21 +277,11 @@
                                 </ul>
                             </div>
                         </li>
-                        {% comment %} <li class="side-nav-item">
-                            <a href="{% url 'dashboard:Product' %}" class="side-nav-link">
-                                <i class="uil-folder-plus"></i>
-                                <span> Product </span>
-                            </a>
-                        </li> {% endcomment %}
+                        
 
                        
 
-                        {% comment %} <li class="side-nav-item">
-                            <a href="{% url 'dashboard:Unit' %}" class="side-nav-link">
-                                <i class="uil-window"></i>
-                                <span> Unit </span>
-                            </a>
-                        </li> {% endcomment %}
+                        
 
                         <li class="side-nav-title">Vehicle </li>                        
 
@@ -295,26 +292,7 @@
                                                                 <span> Vehicle </span>
                             </a>
                         </li>
-                        {% comment %} <li class="side-nav-item">
-                            <a data-bs-toggle="collapse" href="#sidebarPages4" aria-expanded="false" aria-controls="sidebarPages4" class="side-nav-link">
-                                <i class="mdi mdi-account-plus"></i>
-                                <span> Users </span>
-                                <span class="menu-arrow"></span>
-                            </a>
-                            <div class="collapse" id="sidebarPages4">
-                                <ul class="side-nav-second-level">
-                              <li>
-                                        <a href="{% url 'dashboard:User' %}">Admin List</a>
-                                    </li>
-                                
-                                  <li>
-                                        <a href="{% url 'dashboard:Driver' %}">Driver List</a>
-                                    </li>
-                                  
-            
-                                </ul>
-                            </div>
-                        </li> {% endcomment %}
+                        
                      
                         {%endif%}
                         <!-- ads sections-->
@@ -352,12 +330,7 @@
                             </div>
                         </li>
                         {% if request.user.is_admin %}
-                        {% comment %} <li class="side-nav-item">
-                            <a href="{% url 'dashboard:RequestAddress' %}" class="side-nav-link">
-                                <i class="uil-box"></i>
-                                <span> Pick Up Address </span>
-                            </a>
-                        </li> {% endcomment %}
+                        
                            
                         <li class="side-nav-title">Advertisement</li>                        
 
@@ -376,6 +349,10 @@
                                 <span> Banner </span>
                             </a>
                         </li>
+                        {%endif%}
+
+                        {% if request.user.is_admin  or request.user.is_sub_admin%}
+
                         <li class="side-nav-title">  Account and Billing </li>                        
 
                  
@@ -393,30 +370,127 @@
                                         </a>
                                     </li>
 
-                                    <li>
+                                    {% comment %} <li>
                                         <a href= "{% url 'dashboard:cashbook' %}">
                                            Cash Book
                                         </a>
-                                    </li>
+                                    </li> {% endcomment %}
 
                                 </ul>
                             </div>
                         </li>
 
+                         <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#sidebarPages5" aria-expanded="false" aria-controls="sidebarPages5" class="side-nav-link">
+                                <i class="uil-folder-plus"></i>
+                                <span> Inventory </span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="sidebarPages5">
+                                <ul class="side-nav-second-level">
+                              <li>
+                                        <a href="{% url 'dashboard:inventory' %}">Stock</a>
+                                    </li>
+                                
+                                </ul>
+                            </div>
+                        </li>
+                        
+                           <li class="side-nav-title">Sales </li>                        
+
+
+                        
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:sales' %}" class="side-nav-link">
+                                <i class="uil-clipboard-alt"></i>
+                                <span> Sales </span>
+                            </a>
+                        </li>
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:Customers' %}" class="side-nav-link">
+                                <i class="mdi mdi-account"></i>
+                                <span> Suppliers </span>
+                            </a>
+                        </li>
+                        {%endif%}
+                        
+                        {% if request.user.is_admin %}
+                        
+                        <li class="side-nav-title">Notification</li>                        
+                        
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:pick_up_plans' %}" class="side-nav-link">
+                                <i class="uil-document-layout-center"></i>
+                                <span> Pick Plans </span>
+                            </a>
+                        </li> 
+                        
+
                         <li class="side-nav-title">User Management </li>                        
 
+                            
+                        
+                        
                         <li class="side-nav-item">
                             <a href="{% url 'dashboard:User' %}" class="side-nav-link">
-                                <i class="mdi mdi-account-plus"></i>
+                                <i class="mdi mdi-account"></i>
                                 <span> User </span>
                             </a>
                         </li>
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:SubAdmin' %}" class="side-nav-link">
+                                <i class="mdi mdi-account-plus"></i>
+                                <span> SubAdmin </span>
+                            </a>
+                        </li>
+
+
                         <li class="side-nav-item">
                             <a href="{% url 'dashboard:Driver' %}" class="side-nav-link">
                                 <i class="uil-box"></i>
                                 <span> Driver  </span>
                             </a>
                         </li>
+                        
+                        <li class="side-nav-title">Reward Setting </li>                        
+
+                        <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#sidebarPages1" aria-expanded="false" aria-controls="sidebarPages" class="side-nav-link">
+                                <i class="uil-package"></i>
+                                <span> Reward </span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="sidebarPages1">
+                                <ul class="side-nav-second-level">
+                                    <li>
+                                        <a href="{% url 'dashboard:rewards_create_or_update' %}">User Reward Points</a>
+                                    </li>
+                                
+                                </ul>
+                            </div>
+                        </li>
+
+                        {% comment %} Notification {% endcomment %}
+<li class="side-nav-title">Notification Management</li> 
+<li class="side-nav-item">
+    <a data-bs-toggle="collapse" href="#sidebarPages1" aria-expanded="false" aria-controls="sidebarPages1" class="side-nav-link">
+        <i class="uil-bell"></i> <!-- Notification Icon -->
+        <span> Notification </span>
+        <span class="badge bg-danger ms-2" id="notification-count">3</span> <!-- Notification Badge -->
+        <span class="menu-arrow"></span>
+    </a>
+    <div class="collapse" id="sidebarPages1">
+        <ul class="side-nav-second-level">
+            <li>
+                <a href="{% url 'dashboard:rewards_create_or_update' %}">User Reward Points</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+
+                        {% comment %} Setting  {% endcomment %}
+                        
                         <li class="side-nav-title">Settings</li>                        
 
                         <li class="side-nav-item">
@@ -1187,14 +1261,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6">
-                        <script>document.write(new Date().getFullYear())</script> © Garbbage
-                    </div>
-                    <div class="col-md-6">
-                        {% comment %} <div class="text-md-end footer-links d-none d-md-block">
-                            <a href="javascript: void(0);">About</a>
-                            <a href="javascript: void(0);">Support</a>
-                            <a href="javascript: void(0);">Contact Us</a>
-                        </div> {% endcomment %}
+                        <script>document.write(new Date().getFullYear())</script> ©Nepal Recycle Bank
                     </div>
                 </div>
             </div>

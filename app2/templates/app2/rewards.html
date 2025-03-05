@@ -1,0 +1,202 @@
+
+
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %} 
+Update Reward Points
+{% endblock %}
+{% block body %}
+
+<style>
+    #datatable-buttons_length {
+        visibility: visible;
+    }
+
+    #id_percentage {
+        display: block;
+        width: 50%;
+        padding: .45rem .9rem;
+        font-size: .9rem;
+        font-weight: 400;
+        line-height: 1.5;
+        background-color: var(--ct-input-bg);
+        background-clip: padding-box;
+        border: var(--ct-border-width) solid var(--ct-border-color);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: .25rem;
+        -webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+    }
+
+</style>
+    <!-- ============================================================== -->
+    <!-- Start Page Content here -->
+    <!-- ============================================================== -->
+
+    <div class="content-page">
+        <div class="content">
+
+            <!-- Start Content-->
+            <div class="container-fluid">
+
+                <!-- start page title -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                        
+                            <h4 class="page-title">{% if instance %}Update Reward Percentage{% else %}Update Reward Percentage{% endif %}</h4>
+                            {% if messages %}
+                            {% for msg in messages %}
+                                <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- end page title -->
+                
+                
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body row  justify-content-between">
+                                    <div class="col-sm-8">
+                                        <span class="fs-4 text-bold text-uppercase">View All Customers Reward</span><br>
+                                        <span>Customers / Rewards</span>
+                                    </div>
+                                    <div class="col-sm-4  float-end">
+                                        <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:rewards_create_or_update'  %}">
+                                            {% csrf_token %}
+                                               
+                                            <label class="text-nowrap text-capitalize fs-5 pt-1 pe-1">Reward Percentage</label>
+                                            
+                                            <div class="d-flex">
+                                                <input type="number" name="{{ forms.percentage.name }}" id="percentage_input" class="form-control w-100" value="{{ forms.instance.percentage }}">
+                                                <button type="submit" class="btn btn-danger chat-send waves-effect waves-light"  id="update_button">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save" viewBox="0 0 16 16">
+                                                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
+                                                      </svg>
+                                                </button>
+                                                <button type="button" class="btn btn-success " id="edit_button">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                                      </svg>
+                                                </button>
+                                                <button type="button" class="btn btn-warning "  id="cancel_button">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill" viewBox="0 0 16 16">
+                                                        <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
+                                                      </svg>
+                                                </button>
+
+                                            </div>
+                                        
+                                        </form>
+                                    </div> 
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+
+                                    <div class="tab-content">
+                                        <div class="tab-pane show active" id="buttons-table-preview">
+                                            <table id="datatable-buttons" class="table table-striped dt-responsive nowrap w-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th>S.N</th>
+                                                        <th>Customer Name</th>
+                                                        <th>Reward Points</th>
+                                                        <th>Total Transaction</th>
+                                                        <th style="width:200px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for customer in customers_rewards %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td class="text-capitalize">{{ customer.user.name }}</td>
+                                                        <td>{{ customer.points }}</td>
+                                                        <td>{{ customer.total_transaction_amount }}</td>
+                                                        <td>
+                                                            <a href="{% url 'dashboard:user_order_history' customer.user.id %}" class="action-icon" title="view Detail"> <i class="mdi mdi-eye"></i></a>
+                                                            {% comment %} <a href="{% url 'dashboard:user_reward_update' customer.user.id %}" class="font-18 text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="uil uil-pen"></i></a> {% endcomment %}
+                                                            <button type="" class="btn btn-info">Exchange </button>
+
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div> <!-- end preview-->
+                                    </div> <!-- end tab-content-->
+                                    
+                                    
+                                </div> <!-- end card body-->
+                            </div> 
+                        </div>
+                    </div>
+                    
+                <!-- end row-->
+            
+
+            </div> <!-- container -->
+
+        </div> <!-- content -->
+
+    <script>
+        $(document).ready(function() {
+            $('#datatable-buttons').DataTable({
+                paging: true, // Enable pagination
+                searching: true // Enable filtering/searching
+            });
+        });
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#update_button').hide();
+            $('#cancel_button').hide();
+            $('#edit_button').show();
+            $('#percentage_input').prop('disabled', true);
+            $('#edit_button').click(function() {
+                $('#edit_button').hide();
+                $('#update_button').show();
+                $('#percentage_input').prop('disabled', false);
+                $('#cancel_button').show();
+
+
+            });
+
+            $('#update_button').click(function() {
+                $('#update_button').hide();
+                $('#edit_button').show();
+                $('#percentage_input').prop('disabled', false);
+                $('#cancel_button').hide();
+
+            });
+
+            $('#cancel_button').click(function() {
+                $('#cancel_button').hide();
+                $('#edit_button').show();
+                $('#update_button').hide();
+                $('#percentage_input').prop('disabled', true);
+            });
+        });
+    </script>
+   
+
+    
+{%endblock%}

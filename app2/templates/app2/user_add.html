@@ -1,0 +1,73 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+
+{% block title %}
+    User Management
+{% endblock %}
+
+{% block body %}
+<!-- Container for the Add User Button and Form -->
+<div class="container mb-5">
+    <!-- Row to Center the Form -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <h2 class="text-center mb-1">Add User</h2>
+
+            <!-- User Form -->
+            <form method="post"  action="{% url 'dashboard:add_user' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Name Field -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+
+                <!-- Phone Field -->
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phone" name="phone" required>
+                </div>
+
+                <!-- Address Field -->
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" name="address" required>
+                </div>
+
+                <!-- Image Upload Field -->
+                <div class="mb-3">
+                    <label for="image" class="form-label">Profile Image</label>
+                    <input type="file" class="form-control" id="image" name="image">
+                </div>
+
+                <!-- Is User Checkbox -->
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="isUser" name="isUser">
+                    <label class="form-check-label" for="isUser">Is User</label>
+                </div>
+
+                <!-- Activated Checkbox -->
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="activated" name="activated">
+                    <label class="form-check-label" for="activated">Activated</label>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-3 text-center">
+                    <button type="submit" class="btn btn-success bt-3">
+                        <i class="fas fa-save"></i> Save User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %} 
+Order Detail
+{% endblock %}
+{% block body %}
+
+<div class="content-page">
+    <div class="content">
+
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <!-- start page title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        
+                        <h4 class="page-title">Order History </h4>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="header-title mb-3">Order History of - {{user_reward.user.name}}</h4>
+
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead class="table-light">
+
+                                    <tr>
+                                        <th>Sn</th>
+
+                                        <th>Item</th>
+                                        <th>Price</th>
+
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for  order in user_orders%}
+                                        {% for item in order.items.all %}
+
+                                    <tr>
+                                        <td>{{forloop.counter}}</td>
+                                        <td>{{item.product}}</td>
+                                        <td>Rs {{item.product.rate}}</td>
+                                        <td>{{item.quantity}}</td>
+
+                                        <td>Rs{{order.totalPrice}}</td>
+                                    </tr>
+                                    {%endfor%}
+                                    {% endfor %}
+
+                                    
+                                
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- end table-responsive -->
+
+                        </div>
+                    </div>
+                </div> <!-- end col -->
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="header-title mb-3">Order Summary</h4>
+
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Price</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>Total Reward Points:</td>
+                                        <td> {{user_reward.points}}</td>
+                                    </tr>
+                                   
+                                    <tr>
+                                        <th>Total Transaction:</th>
+                                        <th>Rs {{user_reward.total_transaction_amount}}</th>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- end table-responsive -->
+
+                        </div>
+                    </div>
+                </div> <!-- end col -->
+            </div>
+            <!-- end row -->
+
+
+            
+
+            
+        </div> <!-- container -->
+
+</div> <!-- content -->
+
+
+{%endblock%}
