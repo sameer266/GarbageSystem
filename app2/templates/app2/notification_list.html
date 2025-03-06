@@ -4,48 +4,67 @@
 {% block title %} Notification List {% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h2 class="mb-3">Notifications</h2>
-
-    {% if notification %}
-        <div class="card shadow-sm p-3">
-            <table class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for notif in notification %}
-                        <tr class="{% if not notif.read %}table-warning{% endif %}">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ notif.message }}</td>
-                            <td>{{ notif.created_at|date:"d M Y, H:i" }}</td>
-                            <td>
-                                {% if notif.read %}
-                                    <span class="badge bg-success">Read</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Unread</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if not notif.read %}
-                                    <a href="{% url 'mark_notification_read' notif.id %}" class="btn btn-sm btn-primary">
-                                        Mark as Read
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
+<div class="container-fluid">
+    <div class="row">
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-4">
+            
+            <!-- Display messages from backend -->
+            {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p class="alert alert-info">No notifications available.</p>
-    {% endif %}
+                </div>
+            {% endif %}
+            
+            {% if notifications %}
+                <div class="card shadow-sm p-3">
+                    <table class="table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notif in notifications %}
+                                <tr class="{% if not notif.read %}unread-notification{% else %}read-notification{% endif %}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ notif.message }}</td>
+                                    <td>{{ notif.created_at|date:"d M Y, H:i" }}</td>
+                                    <td>
+                                        {% if notif.read %}
+                                            <span class="badge bg-success">Read</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Unread</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'dashboard:app-notification_edit' notif.id %}" class="text-warning mx-1">
+                                            <i class="fas fa-edit small"></i>
+                                        </a>
+                                        <a href="{% url 'dashboard:app-notification_delete' notif.id %}" class="text-danger mx-1">
+                                            <i class="fas fa-trash small"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="alert alert-info">No notifications available.</p>
+            {% endif %}
+        </main>
+    </div>
 </div>
+
 {% endblock %}

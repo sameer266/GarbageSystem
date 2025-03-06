@@ -142,7 +142,10 @@ urlpatterns = [
         path('reward/update/<int:id>',views.user_reward_update, name='user_reward_update'),
         
         # ==== notofication =======
-        path('notification_list',views.notification_list,name="notification_list"),
+        path('notification_list/',views.notification_list,name="app-notification_list"),
+        # path('notification_add/',views.notification_add,name="app-notification_add"),
+        path('notification_edit/<int:id>/',views.notification_edit,name="app-notification_edit"),
+        path('notification_delete/<int:id>/',views.notification_delete,name="app-notification_delete"),
         
 
 

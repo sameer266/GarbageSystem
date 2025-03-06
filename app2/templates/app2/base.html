@@ -13,8 +13,8 @@
         <meta content="A fully features Nepal Recycle Bank CRM. " name="description" />
         <meta content="Nepal Recycle Bank" name="author" />
 
-        <!-- Plugin css -->
-        <link rel="stylesheet" href="{% static 'app2/assets/vendor/jquery-toast-plugin/jquery.toast.min.css'%}">
+        {% comment %} <!-- Plugin css -->
+        <link rel="stylesheet" href="{% static 'app2/assets/vendor/jquery-toast-plugin/jquery.toast.min.css'%}"> {% endcomment %}
 
         <!-- App css -->
         <link href="{% static 'app2/assets/css/app-saas.min.css'%}" rel="stylesheet" type="text/css" id="app-style" />
@@ -482,7 +482,7 @@
     <div class="collapse" id="sidebarPages1">
         <ul class="side-nav-second-level">
             <li>
-                <a href="{% url 'dashboard:notification_list' %}">Notifications</a>
+                <a href="{% url 'dashboard:app-notification_list' %}">Manage Notifications</a>
             </li>
         </ul>
     </div>
@@ -519,7 +519,7 @@
 
   {% endblock  %}
 
-  {% for notification in notifications %}
+  {% comment %} {% for notification in notifications %}
   <div class="toast show mb-4" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="toast-body">
           {{ notification.message }}
@@ -529,9 +529,9 @@
           </div>
       </div>
   </div>
-{% endfor %}
+{% endfor %} {% endcomment %}
 
-<!-- Add this script to activate the toasts -->
+{% comment %} <!-- Add this script to activate the toasts -->
 <script>
   $(document).ready(function(){
     {% for notification in notifications %}
@@ -540,7 +540,7 @@
       toast.show();
     {% endfor %}
   });
-</script>
+</script> {% endcomment %}
 
    <!-- Theme Settings -->
    <div class="offcanvas offcanvas-end" tabindex="-1" id="theme-settings-offcanvas">
@@ -1839,11 +1839,11 @@
                                 <script src="{% static 'app2/assets/vendor/clipboard/clipboard.min.js'%}"></script>
                                 <script src="{% static 'app2/assets/js/hyper-syntax.js'%}"></script>
 
-                                <script src="{% static 'app2/assets/vendor/jquery-toast-plugin/jquery.toast.min.js'%}"></script>
+                                {% comment %} <script src="{% static 'app2/assets/vendor/jquery-toast-plugin/jquery.toast.min.js'%}"></script> {% endcomment %}
                                
 
                                 <!-- Toastr Demo js -->
-                                <script src="{% static 'app2/assets/js/pages/demo.toastr.js'%}"></script>
+                                {% comment %} <script src="{% static 'app2/assets/js/pages/demo.toastr.js'%}"></script> {% endcomment %}
 
                                 {% block script %}
 

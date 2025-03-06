@@ -13,9 +13,6 @@
         border-radius: 4px;
         box-sizing: border-box;
     }
-    .remove-form {
-        margin-left: 10px;
-    }
 </style>
 
 <div class="content-page">
@@ -25,7 +22,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
-                        <h4 class="page-title">{% if instance %}Add or Update Order{% else %}Create Order{% endif %}</h4>
+                        <h4 class="page-title">{% if instance %}Edit Order{% else %}Create Order{% endif %}</h4>
                     </div>
                 </div>
             </div>
@@ -68,31 +65,13 @@
                                     <div class="col-xl-6">
                                         {{ formset.management_form }}
                                         <div id="form-container">
-                                            <!-- Display only the first form initially -->
-                                            {% with formset.forms|first as form %}
+                                            <!-- Render the first form (only one form is needed) -->
+                                            {% for form in formset %}
                                                 <div class="form-row mb-3">
                                                     {{ form.as_p }}
-                                                    <!-- Remove button for the first form (hidden initially) -->
-                                                    <button type="button" class="btn btn-danger btn-sm remove-form" style="display: none;">X</button>
                                                 </div>
-                                            {% endwith %}
+                                            {% endfor %}
                                         </div>
-                                    </div>
-                                </div>
-
-                                {% comment %} {% for i  in  products %}
-
-
-                                <p>{{i.product_name}} <p>
-                                    
-
-
-                                {% endfor %} {% endcomment %}
-
-                                <!-- Add New Item Button -->
-                                <div class="row mt-3">
-                                    <div class="col-auto">
-                                        <button type="button" id="add-item" class="btn btn-success">Add Item</button>
                                     </div>
                                 </div>
 
@@ -102,7 +81,7 @@
                                         <a href="{% url 'dashboard:active_order_list' %}" class="btn btn-danger">Back to Table</a>
                                         <button type="submit" name="calculate_total" class="btn btn-secondary mt-2">Calculate Total Price</button>
                                         <button type="submit" class="btn btn-primary mt-2">
-                                            {% if instance %}Add or Update Order{% else %}Save Order{% endif %}
+                                            {% if instance %}Update Order{% else %}Save Order{% endif %}
                                         </button>
                                     </div>
                                 </div>
@@ -114,57 +93,4 @@
         </div>
     </div>
 </div>
-
-
-
-<!-- JavaScript to Add and Remove Forms Dynamically -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const formContainer = document.getElementById('form-container');
-        const totalForms = document.getElementById('id_items-TOTAL_FORMS'); // Ensure this ID matches your management form
-        let formCount = parseInt(totalForms.value);
-
-        // Function to update the TOTAL_FORMS field
-        function updateTotalForms() {
-            totalForms.value = formCount;
-        }
-
-        // Add new form
-        document.getElementById('add-item').addEventListener('click', function() {
-            const emptyForm = `{{ formset.empty_form.as_p|escapejs }}`;
-            const newFormHtml = emptyForm.replace(/__prefix__/g, formCount);
-
-            const newFormDiv = document.createElement('div');
-            newFormDiv.classList.add('form-row', 'mb-3');
-            newFormDiv.innerHTML = newFormHtml;
-
-            // Add a remove button to the new form
-            const removeButton = document.createElement('button');
-            removeButton.type = 'button';
-            removeButton.classList.add('btn', 'rounded', 'btn-danger', 'btn-sm', 'remove-form');
-            removeButton.textContent = 'X';
-            removeButton.addEventListener('click', function() {
-                formContainer.removeChild(newFormDiv);
-                formCount--;
-                updateTotalForms();
-            });
-
-            newFormDiv.appendChild(removeButton);
-            formContainer.appendChild(newFormDiv);
-
-            formCount++;
-            updateTotalForms();
-        });
-
-        // Add remove functionality to existing forms
-        document.querySelectorAll('.remove-form').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const formRow = button.closest('.form-row');
-                formContainer.removeChild(formRow);
-                formCount--;
-                updateTotalForms();
-            });
-        });
-    });
-</script>
 {% endblock %}

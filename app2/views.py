@@ -986,75 +986,45 @@ def stock_update_create( order_instance):
 
 
 
-
 def create_Order(request, id=None):
     products = Product.objects.all()
-
-    if id:
-        order_instance = get_object_or_404(Order, id=id)
-    else:
-        order_instance = Order()
-
-    # Set extra=0 to prevent empty forms when editing
-    OrderItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=0, can_delete=True)
+    order_instance = get_object_or_404(Order, id=id) if id else Order()
+    OrderItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=1, can_delete=False)
 
     if request.method == 'POST':
-        calculate_total = 'calculate_total' in request.POST  # Check if total should be calculated
-
         order_form = OrderForm(request.POST, request.FILES, instance=order_instance)
         formset = OrderItemFormSet(request.POST, request.FILES, instance=order_instance)
 
         if order_form.is_valid() and formset.is_valid():
-            order_instance = order_form.save(commit=False)  # Save order but don't commit yet
-            order_items = formset.save(commit=False)  # Get order items without saving
-
+            order_instance = order_form.save(commit=False)
+            order_items = formset.save(commit=False)
             total_price = 0
 
-            # Process formset items and calculate total price
             for item in order_items:
-                item.order = order_instance  # Ensure order is linked
-                item.price = item.product.rate  # Set the price from the product rate
-                total_price += item.price * item.quantity  # Calculate total price
+                item.order = order_instance
+                item.price = item.product.rate
+                total_price += item.price * item.quantity
 
-            # Handle deleted items properly
-            for obj in formset.deleted_objects:
-                obj.delete()
+            order_instance.totalPrice = total_price
+            order_instance.save()
+            formset.save()
 
-            order_instance.totalPrice = total_price  # Set total price
-
-            if not calculate_total:
-                order_instance.save()  # Save order
-                formset.save()  # Save order items
-
-                if id:
-                    messages.success(request, 'Order updated successfully.')
-                else:
-                    messages.success(request, 'Order created successfully.')
-
-                return redirect('dashboard:edit_Order', id=order_instance.id)
-
-        # If calculating total price only (without saving)
-        if calculate_total:
-            messages.info(request, f'Total Price Calculated: {total_price}')
-        else:
-            messages.warning(request, order_form.errors)
+            message = 'Order updated successfully.' if id else 'Order created successfully.'
+            messages.success(request, message)
+            return redirect('dashboard:edit_Order', id=order_instance.id)
 
     else:
         order_form = OrderForm(instance=order_instance)
         formset = OrderItemFormSet(instance=order_instance)
 
-    # Calculate total price for existing order (include saved items)
-    if order_instance.pk:
-        total_price = sum(item.product.rate * item.quantity for item in order_instance.items.all())
-    else:
-        total_price = 0
+    total_price = sum(item.product.rate * item.quantity for item in order_instance.items.all()) if order_instance.pk else 0
 
     context = {
         'form': order_form,
         'formset': formset,
         'instance': order_instance,
         'products': products,
-        'total_price': total_price,  # Pass total price to the template
+        'total_price': total_price,
     }
 
     return render(request, 'app2/create_Order.html', context)
@@ -1879,13 +1849,44 @@ def user_order_history(request, id=None):
     user_reward = UserReward.objects.filter(user=id).first()
     return render(request, 'app2/user_order_histroy.html', {'user_orders':user_orders, 'user_reward':user_reward})
 
-    
-@login_required
-def notification_list(request):
-    user=request.user
-    notification=Notification.objects.filter(user=user)
-    return render(request,'app2/notification_list.html',{'notification':notification})
+
+
+# ======= Notification ==========
 
 @login_required
-def notification_edit(request):
-    pass
+def notification_list(request):
+    notifications = Notification.objects.all()
+    return render(request, 'app2/notification_list.html', {'notifications': notifications})
+
+
+# @login_required
+# def notification_add(request):
+#     if request.method == "POST":
+#         message = request.POST.get('message')
+#         status = request.POST.get('status') == "on"
+#         order_number = Notification.objects.count() + 1
+#         Notification.objects.create(user=request.user, message=message, read=status, order_number=order_number)
+#         messages.success(request, "Notification Added Successfully")
+#         return redirect('/notification_list')
+#     return render(request, 'app2/notification_add.html')
+
+@login_required
+def notification_edit(request, id):
+    notification = Notification.objects.get(id=id)
+    if request.method == "POST":
+        notification.message = request.POST.get('message')
+        notification.read = request.POST.get('status') == "on"
+        notification.save()
+        messages.success(request, "Notification Updated Successfully")
+        return redirect('/notification_list')
+    return render(request, 'app2/notification_edit.html', {'notification': notification})
+
+@login_required
+def notification_delete(request, id):
+    notification = Notification.objects.get(id=id)
+    notification.delete()
+    messages.success(request,"Notification deleted successfully")
+    return redirect('/notification_list')
+
+
+    
