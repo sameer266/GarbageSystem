@@ -102,11 +102,17 @@ class Order(models.Model):
                         user_reward.save()
 
     def save(self, *args, **kwargs):
-        is_new = self.pk is None  # Check if order is new
-        super().save(*args, **kwargs)  # Save first
+        if hasattr(self, '_disable_save'):
+            return  # Prevent recursion
+        self._disable_save = True  # Set flag to prevent recursion
+
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
 
         if not is_new and self.order_status == 'received':
-            self.update_stock()  # Update stock only when received
+            self.update_stock()
+
+        del self._disable_save  # Remove flag after saving
 
 
 @receiver(pre_save, sender=Order)
@@ -115,14 +121,11 @@ def pre_save_order(sender, instance, **kwargs):
         try:
             previous_order = Order.objects.get(id=instance.id)
             if instance.order_status != previous_order.order_status:
-                instance.order_status_changed = now()  # Set timestamp if changed
-            else:
-                instance.order_status_changed = previous_order.order_status_changed
+                instance.order_status_changed = now()  # Set timestamp if status changed
         except Order.DoesNotExist:
             instance.order_status_changed = now()  # Set timestamp for new orders
     else:
         instance.order_status_changed = now()  # New orders always have a timestamp
-
 
 
 @receiver(post_save, sender=Order)

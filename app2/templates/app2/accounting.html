@@ -144,6 +144,7 @@
                                             <th>Quantity</th>
                                             <th>Rate</th>
                                             <th>Unit</th>
+                                            <th>Total Price </th>
                                             <th>Remarks</th>
                                             <th>Action</th>
                                         </tr>
@@ -180,6 +181,15 @@
                                                     {% endfor %}
                                                 </ul>
                                             </td>
+
+                                            <td>
+                                                <ul class="list-unstyled mb-0">
+                                                    {% for obj in item.dailyId.all %}
+                                                    <li>{{ obj.prod }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+
                                             <td>
                                                 <ul class="list-unstyled mb-0">
                                                     {% for obj in item.dailyId.all %}
@@ -187,6 +197,10 @@
                                                     {% endfor %}
                                                 </ul>
                                             </td>
+
+                                          
+                                        
+
                                             <td>
                                                 {% if perms.app.view_dailytransaction %}
                                                 <a href="{% url 'dashboard:update_trasancation' item.id %}" class="btn btn-sm btn-outline-primary">

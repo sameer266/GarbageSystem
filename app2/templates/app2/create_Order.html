@@ -22,13 +22,13 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
-                        <h4 class="page-title">{% if instance %}Edit Order{% else %}Create Order{% endif %}</h4>
+                        <h4 class="page-title">{% if instance %}Add or Edit Order{% else %}Create Order{% endif %}</h4>
                     </div>
                 </div>
             </div>
 
             <!-- Form Section -->
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" id="orderForm">
                 {% csrf_token %}
                 <!-- Display Messages -->
                 {% if messages %}
@@ -75,13 +75,20 @@
                                     </div>
                                 </div>
 
+                                <!-- Display Total Price -->
+                                <div id="total-price-display" class="mt-3">
+                                    {% if total_price %}
+                                    <div class="alert alert-info">Total Price: {{ total_price }}</div>
+                                    {% endif %}
+                                </div>
+
                                 <!-- Buttons -->
                                 <div class="row mt-3">
                                     <div class="col-auto">
                                         <a href="{% url 'dashboard:active_order_list' %}" class="btn btn-danger">Back to Table</a>
-                                        <button type="submit" name="calculate_total" class="btn btn-secondary mt-2">Calculate Total Price</button>
+                                        <button type="button" id="calculate-total-btn" class="btn btn-secondary mt-2">Calculate Total Price</button>
                                         <button type="submit" class="btn btn-primary mt-2">
-                                            {% if instance %}Update Order{% else %}Save Order{% endif %}
+                                            {% if instance %}Add or Update Order{% else %}Save Order{% endif %}
                                         </button>
                                     </div>
                                 </div>
@@ -93,4 +100,63 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the calculate button
+        const calculateBtn = document.getElementById('calculate-total-btn');
+        
+        calculateBtn.addEventListener('click', function() {
+            // Get the product select element (name might vary based on your formset structure)
+            const productSelect = document.querySelector('select[name$="-product"]');
+            const quantityInput = document.querySelector('input[name$="-quantity"]');
+            
+            if (productSelect && quantityInput) {
+                const productId = productSelect.value;
+                const quantity = parseFloat(quantityInput.value) || 0;
+                
+                if (productId && quantity > 0) {
+                    // Get the product rate from the selected option's data attribute
+                    // Alternatively, you can use the options if you've stored the rate there
+                    const selectedOption = productSelect.options[productSelect.selectedIndex];
+                    
+                    // This assumes you have data attributes with product rates
+                    // You need to modify your template to include these rates
+                    // For example: <option value="{{ product.id }}" data-rate="{{ product.rate }}">{{ product.name }}</option>
+                    const productRate = parseFloat(selectedOption.getAttribute('data-rate')) || 0;
+                    
+                    if (productRate) {
+                        const totalPrice = (productRate * quantity).toFixed(2);
+                        
+                        // Display the total price
+                        const totalPriceDisplay = document.getElementById('total-price-display');
+                        totalPriceDisplay.innerHTML = `<div class="alert alert-info">Total Price: ${totalPrice}</div>`;
+                    } else {
+                        // If you don't have data attributes, you may need to fetch the rate via AJAX
+                        fetchProductRateAndCalculate(productId, quantity);
+                    }
+                } else {
+                    alert('Please select a product and enter a valid quantity');
+                }
+            }
+        });
+        
+        // Function to fetch product rate via AJAX (if needed)
+        function fetchProductRateAndCalculate(productId, quantity) {
+            fetch(`/get-product-price/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.price) {
+                        const totalPrice = (data.price * quantity).toFixed(2);
+                        const totalPriceDisplay = document.getElementById('total-price-display');
+                        totalPriceDisplay.innerHTML = `<div class="alert alert-info">Total Price: ${totalPrice}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching product price:', error);
+                    alert('Error calculating price. Please try again.');
+                });
+        }
+    });
+</script>
 {% endblock %}

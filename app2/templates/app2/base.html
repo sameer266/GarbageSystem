@@ -26,6 +26,7 @@
         <!-- Bootstrap Datepicker css -->
         <link href="{% static 'app2/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css'%}" rel="stylesheet" type="text/css" />
 
+        
         <!-- Select2 Plugins css -->
         <link href="{% static 'app2/assets/vendor/select2/css/select2.min.css'%}" rel="stylesheet" type="text/css" />
 
@@ -349,7 +350,15 @@
                                 <span> Banner </span>
                             </a>
                         </li>
+
+        
+
                         {%endif%}
+
+
+
+
+                        {% comment %} ====== User ============ {% endcomment %}
 
                         {% if request.user.is_admin  or request.user.is_sub_admin%}
 
@@ -412,6 +421,18 @@
                                 <span> Suppliers </span>
                             </a>
                         </li>
+
+                                   <!--   Logout  button -->
+                                      {% if request.user.is_sub_admin %}
+                                        <li class="side-nav-item">
+                                            <a href="{% url 'dashboard:logout' %}" class="side-nav-link">
+                                                <i class="uil-sign-out-alt"></i>
+                                                <span>Logout</span>
+                                            </a>
+                                        </li>
+                                        {% endif %}
+
+                                      
                         {%endif%}
                         
                         {% if request.user.is_admin %}
@@ -488,21 +509,25 @@
     </div>
 </li>
 
-
-                        {% comment %} Setting  {% endcomment %}
+{% comment %} Setting  {% endcomment %}
                         
-                        <li class="side-nav-title">Settings</li>                        
+<li class="side-nav-title">Settings</li>                        
 
-                        <li class="side-nav-item">
-                            <a href="{% url 'dashboard:AboutUs' %}" class="side-nav-link">
-                                <i class="uil-document-layout-center"></i>
-                                <span> About Company </span>
-                            </a>
-                        </li> 
-{%endif%}
+<li class="side-nav-item">
+    <a href="{% url 'dashboard:AboutUs' %}" class="side-nav-link">
+        <i class="uil-document-layout-center"></i>
+        <span> About Company </span>
+    </a>
+</li> 
 
-                     
-
+{% comment %} Logout {% endcomment %}
+<li class="side-nav-item">
+    <a href="{% url 'dashboard:logout' %}" class="side-nav-link">
+        <i class="uil-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+</li>
+{% endif %}
 
                     </ul>
                     <!--- End Sidemenu -->

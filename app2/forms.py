@@ -139,8 +139,28 @@ class OrderForm(forms.ModelForm):
 
 class OrderItemForm(forms.ModelForm):
     class Meta:
-        model  = OrderItem
-        fields ='__all__'   
+        model = OrderItem
+        fields = '__all__'
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Fetch all products and their rates
+        products = Product.objects.all()
+        product_choices = [(p.id, p.product_name) for p in products]
+        product_rates = {p.id: p.rate for p in products}
+        
+        # Override the product field choices
+        self.fields['product'].widget.choices = product_choices
+        
+        # Add data-rate attributes to the product options
+        self.fields['product'].widget.attrs.update({
+            'data-rates': product_rates  # Pass rates as a JSON object
+        })
     
     
 NewsVideoFormSet = forms.inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1)

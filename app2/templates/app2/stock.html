@@ -72,10 +72,25 @@ Stock
                       </td>
                       <td class="px-2 py-1 align-middle text-center">
                         {{ product.sold_quantity }}
-                      </td>
-                      <td class="text-center">
-                        <a href="/inventory-edit/{{ product.id }}/" class="btn btn-primary btn-sm text-white">Edit</a>
-                      </td>
+                        
+                        
+                        <td class="text-center">
+                          <div class="d-flex justify-content-center gap-1 flex-wrap">
+                            <a href="/inventory-edit/{{ product.id }}/" class="text-light btn btn-primary btn-sm px-2 py-1">
+                              Edit
+                            </a>
+                            <a href="/inventory-delete/{{ product.id }}/" class="text-light btn btn-danger btn-sm px-2 py-1">
+                              Delete
+                            </a>
+                          </div>
+                        </td>
+                        
+                        
+                      
+
+
+                      
+
                       
                     </tr>
                     {% endfor %}

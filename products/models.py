@@ -92,6 +92,7 @@ def generate_transaction_id():
     random_number = random.randint(1111, 9999)
     return str(current_date)+str(random_number)
 
+from django.db.models import Sum
 
 class Invoice(models.Model):
     transaction = models.CharField(max_length = 250, default=generate_transaction_id, editable=False)

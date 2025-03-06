@@ -66,7 +66,7 @@ urlpatterns = [
         path('Advertisement/delete/<int:id>/',views.deleteAdvertisement,name='deleteAdvertisement'),
         
         
-
+         path('get-product-price/<int:product_id>/', views.get_product_price, name='get_product_price'),
         path('Order/add',views.create_Order,name='add_Order'),
         path('Order/edit/<int:id>/',views.create_Order,name='edit_Order'),
         # path('Order/calculate-price/',views.CalculatePrice.as_view(),name='calculate_price'),
@@ -128,6 +128,8 @@ urlpatterns = [
         path('inventory',views.inventory, name="inventory"),
         path('inventory-add',views.inventory_add,name="inventory_add"),
         path('inventory-edit/<int:id>/', views.edit_inventory, name='edit_inventory'),
+        path('inventory-delete/<int:id>/',views.inventory_delete,name="delete_inventory"),
+        
         path('sales', views.sales, name='sales'),
         path('sales/create', views.create_sales, name='create_sales'),
         path('sales/detail/<int:id>', views.sales_details, name='sales_details'),

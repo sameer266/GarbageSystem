@@ -985,7 +985,6 @@ def stock_update_create( order_instance):
             stock.save()
 
 
-
 def create_Order(request, id=None):
     products = Product.objects.all()
     order_instance = get_object_or_404(Order, id=id) if id else Order()
@@ -1000,15 +999,20 @@ def create_Order(request, id=None):
             order_items = formset.save(commit=False)
             total_price = 0
 
+            # Calculate total price
             for item in order_items:
                 item.order = order_instance
                 item.price = item.product.rate
                 total_price += item.price * item.quantity
 
+            # Set total price and save the order instance
             order_instance.totalPrice = total_price
-            order_instance.save()
+            order_instance.save()  # Save the order instance first
+
+            # Save the formset with the updated order instance
             formset.save()
 
+            # Display success message
             message = 'Order updated successfully.' if id else 'Order created successfully.'
             messages.success(request, message)
             return redirect('dashboard:edit_Order', id=order_instance.id)
@@ -1017,6 +1021,7 @@ def create_Order(request, id=None):
         order_form = OrderForm(instance=order_instance)
         formset = OrderItemFormSet(instance=order_instance)
 
+    # Calculate total price for existing order
     total_price = sum(item.product.rate * item.quantity for item in order_instance.items.all()) if order_instance.pk else 0
 
     context = {
@@ -1030,6 +1035,13 @@ def create_Order(request, id=None):
     return render(request, 'app2/create_Order.html', context)
 
 
+def get_product_price(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        return JsonResponse({'price': float(product.rate)})
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+    
 #     # ======= Calculate price  in  Create Order ===========
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
@@ -1199,7 +1211,7 @@ def dailytransaction(request, id=None):
                 return redirect('dashboard:update_trasancation', instance.id)
             else:
                 messages.success(request,"Transaction Added Successfully !")
-                return redirect('dashboard:daily_transaction')
+                return redirect('/dashboard:inventory')
             
         else:
             messages.warning(request,"Please fill out the all form fields !")
@@ -1417,14 +1429,10 @@ def inventory_add(request):
         stock_obj=Stock.objects.create(product=product_obj,quantity=quantity,sold_quantity=sold_quantity)
         messages.success(request,"Inventory added successfully")
         return redirect('/inventory')
-        
-        
-    
-    
     return render(request,'app2/stockAdd.html',{'products':products})
     
     
-
+# edit inventory
 def edit_inventory(request,id):
     stocK_obj=Stock.objects.get(id=id)
     if request.method=="POST":
@@ -1437,7 +1445,16 @@ def edit_inventory(request,id):
         return  redirect('/inventory')
     return render(request, 'app2/stockEdit.html', {'stock_item': stocK_obj})
         
-        
+#  delete inventory
+def inventory_delete(request,id):
+    try:
+        stock=Stock.objects.get(id=id)
+        stock.delete()
+        messages.success(request,"Stock deleted successfully")
+        return redirect('/inventory')
+    except Exception as e:
+        print(e)
+    
         
         
 
@@ -1855,7 +1872,7 @@ def user_order_history(request, id=None):
 
 @login_required
 def notification_list(request):
-    notifications = Notification.objects.all()
+    notifications = Notification.objects.all()[ :30]
     return render(request, 'app2/notification_list.html', {'notifications': notifications})
 
 
