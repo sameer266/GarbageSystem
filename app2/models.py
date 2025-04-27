@@ -30,4 +30,36 @@ class Customers(models.Model):
     
     class Meta:
         ordering =['-id']
+
+class Buyer(models.Model):
+    name=models.CharField(max_length=200)
+    address=models.CharField(max_length=200)
+    phoneNo=models.CharField(max_length=20)
+
+class Purchase(models.Model):
+    buyer=models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    product=models.CharField(max_length=200)
+    quantity=models.PositiveIntegerField()
+    price=models.DecimalField(max_digits=10, decimal_places=2)
+    date=models.DateField(auto_now_add=True)
+    
+    
+    def total_price(self):
+        return self.quantity * self.price
+    
+    def __str__(self):
+        return self.product
+    
+    class Meta:
+        ordering =['-id']
+
+
+    
+    
+    
+    
+    
+    
+        
+
         

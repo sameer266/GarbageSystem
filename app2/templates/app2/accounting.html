@@ -185,7 +185,7 @@
                                             <td>
                                                 <ul class="list-unstyled mb-0">
                                                     {% for obj in item.dailyId.all %}
-                                                    <li>{{ obj.prod }}</li>
+                                                    <li>{{ obj.get_amount }} </li>
                                                     {% endfor %}
                                                 </ul>
                                             </td>

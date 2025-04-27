@@ -26,7 +26,12 @@ class RequestAddress(models.Model):
 
 
 class Notification(models.Model):
+    TYPE=(
+        ('order', 'Order'),
+        ('system', 'System'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=50, choices=TYPE, default='order')
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)

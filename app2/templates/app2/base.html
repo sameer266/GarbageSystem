@@ -422,6 +422,26 @@
                             </a>
                         </li>
 
+
+
+                        {% comment %} -- Purchase---- {% endcomment %}
+                        <li class="side-nav-title">Purchase </li>                        
+                        
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:purchase' %}" class="side-nav-link">
+                                <i class="uil-clipboard-alt"></i>
+                                <span> Purchase </span>
+                            </a>
+                        </li>
+                    
+
+                        <li class="side-nav-item">
+                            <a href="{% url 'dashboard:buyers' %}" class="side-nav-link">
+                                <i class="mdi mdi-account"></i>
+                                <span> Buyers </span>
+                            </a>
+                        </li>
+
                                    <!--   Logout  button -->
                                       {% if request.user.is_sub_admin %}
                                         <li class="side-nav-item">

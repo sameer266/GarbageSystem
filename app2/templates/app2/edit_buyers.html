@@ -1,0 +1,80 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %}Edit Buyers{% endblock %}
+{% block body %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+
+<div class="content-page">
+    <div class="content">
+
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <!-- start page title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <h4 class="page-title">Edit Buyers</h4>
+                    </div>
+                </div>
+            </div>
+            <!-- end page title -->
+          
+            <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:edit_Buyers' instance.id %}">
+                {% csrf_token %}
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ msg.tags }} alert-dismissible text-bg-{{ msg.tags }} border-0 fade show" role="alert">
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <strong>{% if msg.tags == 'success' %}Success{% elif msg.tags == 'warning' %}Warning{% endif %} - </strong>{{ msg.message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+    
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-xl-6">
+                                        <!-- Buyer Name -->
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Buyer Name:<span class="text-danger">*</span></label>
+                                            <input type="text" name="name" id="name" class="form-control" required value="{{ instance.name }}" placeholder="Enter buyer name">
+                                        </div>
+
+                                        <!-- Address -->
+                                        <div class="mb-3">
+                                            <label for="address" class="form-label">Address:<span class="text-danger">*</span></label>
+                                            <input type="text" name="address" id="address" class="form-control" required value="{{ instance.address }}" placeholder="Enter address">
+                                        </div>
+
+                                        <!-- Phone Number -->
+                                        <div class="mb-3">
+                                            <label for="phone_number" class="form-label">Phone Number:<span class="text-danger">*</span></label>
+                                            <input type="tel" name="phone_number" id="phone_number" class="form-control" required value="{{ instance.phoneNo }}" placeholder="Enter phone number" pattern="[0-9]{10}" title="Please enter exactly 10 numeric characters">
+                                        </div>
+                                        <br><br>                                               
+                                    </div>
+                               
+                                </div> <!-- end col-->
+                            
+                                <div class="col-auto">
+                                    <a href="{% url 'dashboard:buyers' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
+                                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Update</button>
+                                </div>
+                                <br><br><br><br><br><br><br><br><br>
+                            </div>
+                            <!-- end row -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+                </div>
+                <!-- end row-->
+            </form>
+        </div> <!-- container -->
+    </div> <!-- content -->
+</div>
+{% endblock %}

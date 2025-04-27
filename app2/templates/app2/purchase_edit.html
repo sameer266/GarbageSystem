@@ -1,0 +1,46 @@
+{% extends 'app2/base.html' %}
+{% block title %}Edit Purchase{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2>Edit Purchase - {{ purchase.buyer.name }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Buyer</label>
+            <select name="buyer" class="form-control" required>
+                {% for buyer in buyers %}
+                    <option value="{{ buyer.id }}" {% if buyer.id == purchase.buyer.id %}selected{% endif %}>
+                        {{ buyer.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Product</label>
+            <select name="product" class="form-control" required>
+                {% for product in products %}
+                    <option value="{{ product.id }}" {% if product.id == purchase.product.id %}selected{% endif %}>
+                        {{ product.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Unit</label>
+            <input type="number" name="unit" class="form-control" required min="1" value="{{ purchase.unit }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Date</label>
+            <input type="date" name="date" class="form-control" required value="{{ purchase.date|date:'Y-m-d' }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'dashboard:purchase_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

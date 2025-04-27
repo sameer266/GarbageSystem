@@ -27,7 +27,8 @@ SECRET_KEY = 'django-insecure-4zmowgg%7pswlt5nsynkpy&w2vnm3wso7(9#0&wzubcz^thn^#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','http://nepalrecyclebank.com','https://nepalrecyclebank.com','nepalrecyclebank.com','www.nepalrecyclebank.com']
+ALLOWED_HOSTS = ['*','192.168.18.167']
+
 
 
 # Application definition
@@ -226,3 +227,13 @@ CORS_ALLOW_ALL_ORIGINS=True
 
 
 DEFAULT_UNKNOWN_PERSON_IMAGE_URL ="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmg6Ov4Q4YHiD79E_tiZlFEPKnDWxA3pnIPA&usqp=CAU"
+
+
+CORS_ALLOW_ALL_ORIGINS=True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000", 
+    "http://192.168.18.167:8000",  
+]

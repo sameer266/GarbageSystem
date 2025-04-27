@@ -1490,7 +1490,117 @@ def sales_details(request, id=None):
 def sales_invoice(request,id=None):
     sales_instance = Invoice.objects.get(id=id)
     return render(request, 'app2/sales_invoice.html',{'sales_instance':sales_instance})
+
+
+
+# ============ Purchase ============
+
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+
+def purchase(request):
+    items_per_page = 10  
+    purchase_list = Purchase.objects.all()
+
+    # Create a total = unit * product.price (calculated in query itself)
+    purchase_list = purchase_list.annotate(
+        total=ExpressionWrapper(F('quantity') * F('price'), output_field=DecimalField())
+    )
+
+    paginator = Paginator(purchase_list, items_per_page)
+    page = request.GET.get('page')
+
+    try:
+        purchases = paginator.page(page)
+    except PageNotAnInteger:
+        purchases = paginator.page(1)
+    except EmptyPage:
+        purchases = paginator.page(paginator.num_pages)
+
+    total_amount = purchase_list.aggregate(total_cost=Sum('total'))['total_cost'] or 0
+    total_purchase = purchase_list.count()
+    buyers = Buyer.objects.all()
+    return render(request, 'app2/purchases.html', {
+        'buyers': buyers,
+        'purchases': purchases,
+        'total_purchase': total_purchase,
+        'total_amount': total_amount
+    })
+
+
+
+def create_purchase(request):
+    buyers = Buyer.objects.all()
+    products = Product.objects.all()
+
+    if request.method == 'POST':
+        buyer_id = request.POST.get('buyer')  # matches <select name="supplier">
+        total = request.POST.get('total')
+
+        buyer = get_object_or_404(Buyer, id=buyer_id)
+
+        pid_list = request.POST.getlist('pid[]')
+        quantity_list = request.POST.getlist('quantity[]')
+        price_list = request.POST.getlist('price[]')
+
+        if not pid_list:
+            return JsonResponse({'status': 'failed', 'msg': 'No products added.'})
+
+        for pid, qty, price in zip(pid_list, quantity_list, price_list):
+            try:
+                qty = int(qty)
+                price = float(price)
+            except ValueError:
+                continue  # skip invalid inputs
+
+            product = get_object_or_404(Product, id=pid)
+            Purchase.objects.create(
+                buyer=buyer,
+                product=product.product_name,  
+                quantity=qty,
+                price=price
+            )
+        
+        return JsonResponse({'status': 'success'})
     
+    return render(request, 'app2/purchase_create.html', {'buyers': buyers, 'products': products})
+
+
+
+
+# Edit Purchase manually
+def update_purchase(request, pk):
+    purchase = get_object_or_404(Purchase, pk=pk)
+    buyers = Buyer.objects.all()
+    products = Product.objects.all()
+    
+    if request.method == 'POST':
+        buyer_id = request.POST.get('buyer')
+        product_id = request.POST.get('product')
+        unit = request.POST.get('unit')
+        date = request.POST.get('date')
+        
+        purchase.buyer = get_object_or_404(Buyer, id=buyer_id)
+        purchase.product = get_object_or_404(Product, id=product_id)
+        purchase.unit = unit
+        purchase.date = date
+        purchase.save()
+        
+        messages.success(request, 'Purchase Updated Successfully!')
+        return redirect('dashboard:purchase_list')
+    
+    return render(request, 'app2/purchase_edit.html', {'purchase': purchase, 'buyers': buyers, 'products': products})
+
+
+# Delete Purchase
+def delete_purchase(request, pk):
+    purchase = get_object_or_404(Purchase, pk=pk)
+    purchase.delete()
+    messages.success(request, 'Purchase Deleted Successfully!')
+    return redirect('dashboard:purchase')
+   
+
+# Get Product Price
+
 def get_product(request):
     resp = {'status':'failed','data':{},'msg':''}
     pk= request.GET.get('pk')
@@ -1691,6 +1801,8 @@ def add_edit_Customers(request, id=None):
     context = {'form': form, 'instance': instance}
     return render(request, 'app2/create_Customers.html', context)
 
+
+
 @user_role_required('admin')
 def Customerss(request):
     if request.method =="POST":
@@ -1732,9 +1844,7 @@ def deleteCustomers(request, id):
 
 def customer_invoices(request, customer_id):
     customer = get_object_or_404(Customers, pk=customer_id)
-    invoices = Invoice.objects.filter(customer=customer)
-
-
+    invoices = Invoice.objects.filter(customer=customer)    
     # Pagination
     paginator = Paginator(invoices, 10)  # Show 10 invoices per page
     page = request.GET.get('page')
@@ -1747,8 +1857,87 @@ def customer_invoices(request, customer_id):
 
     return render(request, 'app2/Customers_sales_detail.html', {'customer': customer, 'invoices': invoices})
     
-    
 
+# ======= Buyer ============
+
+def purchase_invoices(request,buyer_id):
+    buyer=Buyer.objects.get(id=buyer_id)
+    purchases=Purchase.objects.filter(buyer=buyer)
+    paginator=Paginator(purchases,10)
+    page=request.GET.get('page')
+    try:
+        purchases=paginator.page(page)
+    except PageNotAnInteger:
+        purchases=paginator.page(1)
+    except EmptyPage:
+        purchases=paginator.page(paginator.num_pages)
+    return render(request,'app2/Buyers_purchases_detail.html',{'purchase':purchases,'buyer':buyer})
+
+
+
+@user_role_required('admin')
+def buyers(request):
+    if request.method =="POST":
+        name=request.POST.get('name')
+        address=request.POST.get('address')
+        phone=request.POST.get('phone_number')
+        buyers=Buyer.objects.all()
+        if name:
+            buyers=Buyer.objects.filter(name__icontains=name)
+        
+        if address:
+            buyers=Buyer.objects.filter(address__icontains=address)
+        if phone:
+            buyers=Buyer.objetcs.fillter(phone__icontains=phone)
+        return render(request,'app2/buyers.html',{'details':buyers})
+            
+    else:
+        buyers=Buyer.objects.all()
+        return render(request,'app2/buyers.html',{'details':buyers})
+    
+@user_role_required('admin')
+def add_Buyers(request):
+    if request.method=="POST":
+        name=request.POST.get('name')
+        address=request.POST.get('address')
+        phone=request.POST.get('phone_number')
+        if name and address and phone:
+            buyers=Buyer.objects.create(name=name,address=address,phoneNo=phone)
+            messages.success(request,"Buyers added successfully")
+            return redirect('/buyers')
+        else:
+            messages.warning(request,"Please fill out the all form fields !")
+            return redirect('/buyers')
+    return render(request,'app2/create_buyers.html')
+
+@user_role_required('admin')
+def edit_Buyers(request,id):
+    instance = Buyer.objects.get(id=id)
+    if request.method=="POST":
+        name=request.POST.get('name')
+        address=request.POST.get('address')
+        phone=request.POST.get('phone_number')
+        if name and address and phone:
+            instance.name=name
+            instance.address=address
+            instance.phone=phone
+            instance.save()
+            messages.success(request,"Buyers updated successfully")
+            return redirect('/buyers')
+        else:
+            messages.warning(request,"Please fill out the all form fields !")
+            return redirect('/buyers')
+    return render(request,'app2/edit_buyers.html',{'instance':instance})
+    
+@user_role_required('admin')
+def delete_Buyers(request, id):
+    record = Buyer.objects.get(pk=id)
+    record.delete()
+    messages.success(request,'Buyer Deleted Successfully !')
+    return redirect('dashboard:buyers')
+
+
+# ======= Export Data ==========
 ''' export file in excel csv and pdf '''
 import csv
 import xlsxwriter
@@ -1757,7 +1946,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from .models import Customers
+from .models import Customers,Buyer
 
 @login_required
 def export_data(request, format):

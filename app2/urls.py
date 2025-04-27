@@ -23,6 +23,9 @@ urlpatterns = [
         
         path('customer-invoice/<int:customer_id>/', views.customer_invoices, name='customer_invoices'),
 
+        path('purchase/invoice/<int:buyer_id>/', views.purchase_invoices, name='purchase_invoice'),
+
+
     
         path('categorie',views.categories,name='Category'),
         path('categorie/add',views.add_edit_Category,name='add_Category'),
@@ -41,6 +44,12 @@ urlpatterns = [
         path('suppliers/edit/<int:id>/',views.add_edit_Customers,name='edit_Customers'),
         path('suppliers/delete/<int:id>/',views.deleteCustomers,name='deleteCustomers'),
         path('suppliers/export/<format>',views.export_data, name='export_data'),
+        
+        
+        path('buyers',views.buyers,name="buyers"),
+        path('buyers/add',views.add_Buyers,name='add_Buyers'),
+        path('buyers/edit/<int:id>/',views.edit_Buyers,name='edit_Buyers'),
+        path('buyers/delete/<int:id>/',views.delete_Buyers,name='delete_Buyers'),
 
         path('Vehicle',views.Vehicles,name='Vehicle'),
         path('Vehicle/add',views.add_edit_Vehicle,name='add_Vehicle'),
@@ -134,6 +143,15 @@ urlpatterns = [
         path('sales/create', views.create_sales, name='create_sales'),
         path('sales/detail/<int:id>', views.sales_details, name='sales_details'),
         path('sales/invoice/<int:id>', views.sales_invoice, name='sale_invoice'),
+        
+        
+        # ========= Purchase =============
+        path('purchase', views.purchase, name='purchase'),
+        path('purchase/create', views.create_purchase, name='create_purchase'),
+        path('purchase/edit/<int:id>', views.update_purchase, name='edit_purchase'),
+        path('purchase/delete/<int:id>', views.delete_purchase, name='delete_purchase'),
+        
+        
         
         path('save_sales',views.save_sales, name="save-sales"),
         path('get_product',views.get_product,name='get-product'),

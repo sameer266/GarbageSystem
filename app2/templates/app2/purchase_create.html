@@ -1,0 +1,217 @@
+{% extends 'app2/base.html' %}
+{% block title %} Create Purchase {% endblock %}
+{% block body %}
+<div class="content-page">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="container pt-3">
+                <div class="card card-default border shadow rounded-0">
+                    <div class="card-header">
+                        <div class="w-100 d-flex justify-content-between">
+                            <h5 class="fw-bolder card-title">Purchase Transaction</h5>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="container-fluid">
+                            <form action="" id="purchase-form" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                        <div class="form-group">
+                                            <label for="supplier" class="control-label">Buyer Name</label>
+                                            <select name="buyer" class="form-control rounded-0" required>
+                                                <option value="" selected disabled>Select Buyer</option>
+                                                {% for buyer in buyers %}
+                                                    <option value="{{ buyer.id }}">{{ buyer.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr/>
+
+                                <fieldset>
+                                    <legend>Items</legend>
+
+                                    <div class="row align-items-end">
+                                        <div class="col-lg-5 col-md-6 col-sm-12 col-xs-12">
+                                            <div class="form-group">
+                                                <label for="pid" class="control-label">Product</label>
+                                                <select id="pid" class="form-control rounded-0">
+                                                    <option value="" selected disabled>Please Select</option>
+                                                    {% for product in products %}
+                                                        <option value="{{ product.pk }}">{{ product }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+                                            <button type="button" class="btn btn-sm btn-light border bg-gradient rounded-0 shadow-0" id="add_to_list">
+                                                <i class="fa fa-plus"></i> Add to List
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <br/><br/>
+
+                                    <table class="table table-bordered" id="product-tbl">
+                                        <colgroup>
+                                            <col width="5%" />
+                                            <col width="10%" />
+                                            <col width="10%" />
+                                            <col width="25%" />
+                                            <col width="30%" />
+                                            <col width="25%" />
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th class="text-center">QTY</th>
+                                                <th class="text-center">Unit</th>
+                                                <th class="text-center">Cost Price</th>
+                                                <th class="text-center">Product</th>
+                                                <th class="text-center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="5" class="text-end">Grand Total</th>
+                                                <th class="text-end">
+                                                    <input type="hidden" name="total" value="0" />
+                                                    <span class="fw-bold" id="total">0.00</span>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </fieldset>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card-footer py-1 text-end">
+                        <button class="btn btn-primary bg-gradient px-3 rounded-0" form="purchase-form">
+                            <i class="fa fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product row template -->
+            <noscript id="prod-item-clone">
+                <tr class="item">
+                    <td class="text-center">
+                        <input type="hidden" name="pid[]" />
+                        <button class="btn btn-outline-danger btn-sm rem-item" type="button">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <input type="number" min="1" name="quantity[]" value="1" class="form-control rounded-0 text-center input-quantity" />
+                    </td>
+                    <td class="text-center product_unit">Unit</td>
+                    <td class="text-end">
+                        <input type="number" min="0" step="any" name="price[]" value="0" class="form-control rounded-0 text-end input-price" />
+                    </td>
+                    <td class="px-2 py-1 product_name">Product Name</td>
+                    <td class="text-end product_total">0.00</td>
+                </tr>
+            </noscript>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function calc() {
+    var gtotal = 0;
+    $('#product-tbl tbody tr').each(function() {
+        var price = $(this).find('.input-price').val();
+        var quantity = $(this).find('.input-quantity').val();
+        price = price > 0 ? price : 0;
+        quantity = quantity > 0 ? quantity : 0;
+        var total = parseFloat(price) * parseFloat(quantity);
+        $(this).find('.product_total').text(parseFloat(total).toLocaleString('en-US'));
+        gtotal += parseFloat(total);
+    });
+    $('#total').text(parseFloat(gtotal).toLocaleString('en-US'));
+    $('[name="total"]').val(gtotal);
+}
+
+$(function() {
+    $('#pid').select2({
+        placeholder: 'Please Select Product',
+        width: "100%"
+    });
+
+    $('#add_to_list').click(function() {
+        var pid = $('#pid').val();
+        if (!pid) return;
+
+        $.ajax({
+            url: "{% url 'dashboard:get_product_data' %}",
+            data: {'pk': pid},
+            dataType: 'json',
+            success: function(data) {
+                if ($('#product-tbl tbody tr[data-id="' + data.data.id + '"]').length > 0) {
+                    alert("Product already in the list");
+                    return;
+                }
+                var tr = $($('noscript#prod-item-clone').html()).clone();
+                tr.attr('data-id', data.data.id);
+                tr.find('input[name="pid[]"]').val(data.data.id);
+                tr.find('input[name="price[]"]').val(data.data.cost_price || data.data.price);
+                tr.find('.product_name').text(data.data.product);
+                tr.find('.product_unit').text(data.data.unit || "Unit");
+                tr.find('.product_total').text(data.data.cost_price || data.data.price);
+
+                tr.find('[name="quantity[]"]').on('change input', function() {
+                    calc();
+                });
+                tr.find('[name="price[]"]').on('change input', function() {
+                    calc();
+                });
+
+                tr.find('.rem-item').click(function() {
+                    tr.remove();
+                    calc();
+                });
+
+                $('#product-tbl tbody').append(tr);
+                calc();
+            }
+        });
+    });
+
+    $('#purchase-form').submit(function(e) {
+        e.preventDefault();
+        var _this = $(this);
+        $.ajax({
+            url: "{% url 'dashboard:create_purchase' %}",
+            method: "POST",
+            data: new FormData(_this[0]),
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(resp) {
+                if (resp.status == 'success') {
+                    alert('Purchase saved successfully!');
+                    location.reload();
+                } else {
+                    alert(resp.msg || "Error saving purchase");
+                }
+            },
+            error: function(err) {
+                console.error(err);
+                alert("Server error");
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

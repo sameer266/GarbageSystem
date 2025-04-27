@@ -1,0 +1,101 @@
+{% extends 'app2/base.html' %} 
+{% load custome_filter %} 
+{% load static %}
+{% block title %} Buyer Purchases {% endblock %}
+{% block body %}
+<div class="content-page">
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row pt-3">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="card card-default rounded-0 shadow">
+            <div class="card-header">
+              <div class="d-flex w-100 align-items-center justify-content-between">
+                <h4 class="card-title fw-bold">
+                  Purchases for: {{ buyer.ownerName }}
+                </h4>
+                <a href="{% url 'dashboard:create_purchase' %}" class="card-title fw-bold btn btn-primary btn-sm">
+                  Add New Purchase
+                </a>
+              </div>
+            </div>
+
+            <div class="card-body pt-1">
+              <div class="container-fluid">
+                <table class="table table-bordered" id="product-list">
+                  <colgroup>
+                    <col width="5%" />
+                    <col width="20%" />
+                    <col width="20%" />
+                    <col width="20%" />
+                    <col width="15%" />
+                    <col width="25%" />
+                    <col width="25%" />
+                  </colgroup>
+                  <thead>
+                    <tr class="bg-gradient bg-primary bg-opacity-50 text-light">
+                      <th class="px-2 py-2 text-center">S.N</th>
+                      <th class="px-2 py-2 text-center">Transaction</th>
+                      <th class="px-2 py-2 text-center">Buyer Name</th>
+                      <th class="px-2 py-2 text-center">Products</th>
+                      <th class="px-2 py-2 text-center">Total</th>
+                      <th class="px-2 py-2 text-center">Date</th>
+                      <th class="px-2 py-2 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in purchases %}
+                    <tr>
+                      <td class="px-2 py-1 align-middle text-center">{{ forloop.counter }}</td>
+                      <td class="px-2 py-1 align-middle text-center">{{ item }}</td>
+                      <td class="px-2 py-1 align-middle text-center">{{ item.buyer }}</td>
+                      <td class="px-2 py-1 align-middle text-center">
+                        {% for detail in item.purchase_items.all %}
+                          {{ detail.product }},<br>
+                        {% endfor %}
+                      </td>
+                      <td class="px-2 py-1 align-middle text-end">{{ item.total }}</td>
+                      <td class="px-2 py-1 align-middle text-center">{{ item.date_created }}</td>
+                      <td class="px-2 py-1 align-middle text-center d-flex">
+                        <a href="{% url 'dashboard:purchase_detail' item.id %}" class="action-icon" title="View Detail">
+                          <i class="mdi mdi-eye"></i>
+                        </a>
+                        <a href="{% url 'dashboard:purchase_invoice' item.id %}" target="_blank" title="Print">
+                          <i class="mdi mdi-printer"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="7" class="text-center">No Purchases found.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="pagination mt-3">
+              <span class="step-links float-center">
+                {% if purchases.has_previous %}
+                  <a href="?page=1">&laquo; first</a>
+                  <a href="?page={{ purchases.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="current">
+                  Page {{ purchases.number }} of {{ purchases.paginator.num_pages }}.
+                </span>
+                {% if purchases.has_next %}
+                  <a href="?page={{ purchases.next_page_number }}">next</a>
+                  <a href="?page={{ purchases.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'app2/base.html' %}
+{% load static %}
+{% block title %} 
+Buyers
+{% endblock %}
+{% block body %}
+
+<style>
+    #datatable-buttons_length {
+        visibility: visible;
+    }
+</style>
+
+
+            <!-- ============================================================== -->
+            <!-- Start Page Content here -->
+            <!-- ============================================================== -->
+
+            <div class="content-page">
+                <div class="content">
+
+                    <!-- Start Content-->
+                    <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box">
+                                    <h4 class="page-title">Buyers</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end page title -->
+                     
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body row  justify-content-between">
+                                        <div class="col-sm-6">
+                                            <span class="fs-4 text-bold text-uppercase">View All Buyers</span><br>
+                                            <span>Buyers / All Buyers</span>
+                                        </div>
+                                        <div class="col-sm-5 ">
+                                            <a href="{% url 'dashboard:add_Buyers' %}" class="btn btn-danger float-end"><i class="mdi mdi-plus-circle "></i> Add Buyers</a>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <form method="POST" action="{% url 'dashboard:buyers' %}">
+                                            {% csrf_token %}
+                                        <div class="row">
+                                            
+                                            <div class="col-sm-3">
+                                                <input type="text" class="form-control" name="name" placeholder="Buyer name">
+                                            </div> 
+                                            <div class="col-sm-3">
+                                                <input type="text" class="form-control" name="address" placeholder="Address ">
+                                            </div> 
+                                            <div class="col-sm-2">
+                                                <input type="number" class="form-control" name="phone_number" placeholder="Phone number">
+                                            </div> 
+                                            
+                                            <div class="col-sm-1">
+                                                <div class="col-sm-1">
+                                                    <button type="submit" class="btn btn-success pt-1 pb-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                                        </svg>
+                                                    </button>
+                                                </div> 
+                                                
+                                            </div> 
+                                        </div>
+                                         </form>
+                                    </div>
+                                </div>
+                            </di>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+
+                                     
+                                        <div class="row justify-content-between pb-3">
+                                            <div class="col-6">
+                                                Buyers Table
+                                            </div>
+                                            <div class="col-6 float-end">
+                                                <a class="btn btn-success" href="">Export to Excel</a>
+                                                <a class="btn btn-info" href="">Export to CSV</a>
+                                                <a class="btn btn-warning" href="">Export to PDF</a>
+
+                                            </div>
+                                        </div>
+                                        <div class="tab-content">
+                                            <div class="tab-pane show active" id="buttons-table-preview">
+                                                <table id="datatable-buttons" class="table table-striped dt-responsive nowrap w-100">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                      
+                                                            <th>Name</th>
+                                                            <th>Address</th>
+                                                            <th>Contact</th>
+                                                            <th style="width:200px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for item in details %}
+                                                        <tr>
+                                                            <td>{{ forloop.counter }}</td>
+                                                         
+                                                            <td>{{ item.name }}</td>
+                                                            <td>{{ item.address }}</td>
+                                                            <td>{{ item.phoneNo }}</td>
+                                                            <td>
+                                                                <a href="{% url 'dashboard:purchase_invoice'  item.id %} " class="action-icon" title="view Detail"> <i class="mdi mdi-eye"></i></a>
+                                                                <a href="{% url 'dashboard:edit_Buyers' item.id %}" class="font-18 text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="uil uil-pen"></i></a>
+                                                                <a href="{% url 'dashboard:delete_Buyers' item.id %}" data-toggle="modal" class="action-icon"> <i class="mdi mdi-delete"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div> <!-- end preview-->
+                                        </div> <!-- end tab-content-->
+                                        
+                                        
+                                    </div> <!-- end card body-->
+                                </div> <!-- end card -->
+                            </div><!-- end col-->
+                        </div> <!-- end row-->
+
+
+                  
+                    </div> <!-- container -->
+
+                </div> <!-- content -->
+                <script>
+                    $(document).ready(function() {
+                        $('#datatable-buttons').DataTable({
+                            paging: true, // Enable pagination
+                            searching: true // Enable filtering/searching
+                        });
+                    });
+                </script>
+
+
+                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+                <script>
+                $(document).ready(function() {
+                    $('#entries-select').change(function() {
+                    var numEntries = $(this).val();
+                    $('#data-table tbody tr').hide();
+                    $('#data-table tbody tr').slice(0, numEntries).show();
+                    });
+
+                    $('#entries-select').trigger('change');
+                });
+                </script>
+                
+{% endblock %}
