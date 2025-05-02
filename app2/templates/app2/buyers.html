@@ -85,12 +85,12 @@ Buyers
                                             <div class="col-6">
                                                 Buyers Table
                                             </div>
-                                            <div class="col-6 float-end">
+                                            {% comment %} <div class="col-6 float-end">
                                                 <a class="btn btn-success" href="">Export to Excel</a>
                                                 <a class="btn btn-info" href="">Export to CSV</a>
                                                 <a class="btn btn-warning" href="">Export to PDF</a>
 
-                                            </div>
+                                            </div> {% endcomment %}
                                         </div>
                                         <div class="tab-content">
                                             <div class="tab-pane show active" id="buttons-table-preview">
@@ -114,7 +114,7 @@ Buyers
                                                             <td>{{ item.address }}</td>
                                                             <td>{{ item.phoneNo }}</td>
                                                             <td>
-                                                                <a href="{% url 'dashboard:purchase_invoice'  item.id %} " class="action-icon" title="view Detail"> <i class="mdi mdi-eye"></i></a>
+                                                                {% comment %} <a href="{% url 'dashboard:purchase_invoice'  item.id %} " class="action-icon" title="view Detail"> <i class="mdi mdi-eye"></i></a> {% endcomment %}
                                                                 <a href="{% url 'dashboard:edit_Buyers' item.id %}" class="font-18 text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="uil uil-pen"></i></a>
                                                                 <a href="{% url 'dashboard:delete_Buyers' item.id %}" data-toggle="modal" class="action-icon"> <i class="mdi mdi-delete"></i></a>
                                                             </td>

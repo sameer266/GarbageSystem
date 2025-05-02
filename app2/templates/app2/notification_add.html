@@ -7,30 +7,27 @@
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <h2 class="mb-3">Add Notification</h2>
+            <h2 class="mb-3">Add System Notification</h2>
 
-            <!-- Custom CSS for the checkbox -->
             <style>
-                /* Hide the default checkbox */
                 .custom-checkbox .form-check-input {
                     width: 20px;
                     height: 20px;
-                    background-color:rgb(0, 0, 0);
+                    background-color: rgb(0, 0, 0);
                     border-radius: 4px;
                     border: 2px solid #ddd;
+                    appearance: none;
                     transition: all 0.3s ease;
                     position: relative;
-                    appearance: none; /* Removes default checkbox appearance */
                 }
 
-                /* Add a checkmark when the checkbox is checked */
                 .custom-checkbox .form-check-input:checked {
-                    background-color:rgb(255, 26, 26);
-                    border-color:rgb(0, 0, 0);
+                    background-color: rgb(255, 26, 26);
+                    border-color: rgb(0, 0, 0);
                 }
 
                 .custom-checkbox .form-check-input:checked::after {
-                    content: '✔'; /* Adds the checkmark */
+                    content: '✔';
                     position: absolute;
                     top: 0;
                     left: 4px;
@@ -38,14 +35,12 @@
                     color: white;
                 }
 
-                /* Label styling */
                 .custom-checkbox .form-check-label {
                     font-size: 16px;
                     color: #333;
                     padding-left: 8px;
                 }
 
-                /* Focus styling */
                 .custom-checkbox .form-check-input:focus {
                     border-color: #28a745;
                     box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
@@ -53,17 +48,27 @@
             </style>
 
             <div class="card p-4 shadow-sm">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data" id="notificationForm">
                     {% csrf_token %}
+
                     <div class="mb-3">
                         <label for="message" class="form-label">Message</label>
                         <input type="text" id="message" name="message" class="form-control" required>
                     </div>
 
-                    <!-- Checkbox -->
-                    <div class="mb-3 form-check custom-checkbox">
-                        <input class="form-check-input" type="checkbox" id="status" name="status">
-                        <label class="form-check-label" for="status">Mark as Read</label>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Image (optional)</label>
+                        <input type="file" id="image" name="image" class="form-control">
+                        <small class="text-muted">Recommended size: 300x300 pixels</small>
+                        <img id="preview" src="/media/logoimage/1xhp.png" alt="Preview" width="150" height="150" class="mt-2 border rounded">
+                    </div>
+
+                    <!-- Hidden field to simulate default image -->
+                    <input type="hidden" name="default_image" value="/media/logoimage/1xhp.png" />
+
+                    <div class="form-check mb-3 custom-checkbox">
+                        <input class="form-check-input" type="checkbox" id="read" name="read">
+                        <label class="form-check-label" for="read">Mark as Read</label>
                     </div>
 
                     <button type="submit" class="btn btn-success">Save</button>
@@ -73,4 +78,13 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('image').addEventListener('change', function(event) {
+    const [file] = this.files;
+    if (file) {
+        document.getElementById('preview').src = URL.createObjectURL(file);
+    }
+});
+</script>
 {% endblock %}

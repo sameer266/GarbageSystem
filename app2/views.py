@@ -1531,9 +1531,11 @@ def purchase(request):
 def create_purchase(request):
     buyers = Buyer.objects.all()
     products = Product.objects.all()
+    
 
     if request.method == 'POST':
-        buyer_id = request.POST.get('buyer')  # matches <select name="supplier">
+        print(request.POST)
+        buyer_id = request.POST.get('buyer')  
         total = request.POST.get('total')
 
         buyer = get_object_or_404(Buyer, id=buyer_id)
@@ -1545,21 +1547,30 @@ def create_purchase(request):
         if not pid_list:
             return JsonResponse({'status': 'failed', 'msg': 'No products added.'})
 
+        product = get_object_or_404(Product, id=pid_list[0])
+        stock_obj=Stock.objects.get(product=product)
+        if stock_obj.quantity <  float(quantity_list[0]):
+            return JsonResponse({'status':'failed','msg':f'Only {stock_obj.quantity} items are in stock. Please reduce your quantity'})
+        Purchase.objects.create(
+                buyer=buyer,
+                product=product.product_name,  
+                quantity=quantity_list[0],
+                price=price_list[0]
+            )
+        
+        
         for pid, qty, price in zip(pid_list, quantity_list, price_list):
             try:
                 qty = int(qty)
                 price = float(price)
+                
+                print("Stock object",stock_obj)
+                stock_obj.quantity=stock_obj.quantity-qty
+                stock_obj.save()
             except ValueError:
-                continue  # skip invalid inputs
+                continue 
 
-            product = get_object_or_404(Product, id=pid)
-            Purchase.objects.create(
-                buyer=buyer,
-                product=product.product_name,  
-                quantity=qty,
-                price=price
-            )
-        
+          
         return JsonResponse({'status': 'success'})
     
     return render(request, 'app2/purchase_create.html', {'buyers': buyers, 'products': products})
@@ -1860,18 +1871,18 @@ def customer_invoices(request, customer_id):
 
 # ======= Buyer ============
 
-def purchase_invoices(request,buyer_id):
-    buyer=Buyer.objects.get(id=buyer_id)
-    purchases=Purchase.objects.filter(buyer=buyer)
-    paginator=Paginator(purchases,10)
-    page=request.GET.get('page')
+def purchase_invoices(request, buyer_id):
+    buyer = Buyer.objects.get(id=buyer_id)
+    purchases = Purchase.objects.filter(buyer=buyer)
+    paginator = Paginator(purchases, 10)
+    page = request.GET.get('page')
     try:
-        purchases=paginator.page(page)
+        purchases = paginator.page(page)
     except PageNotAnInteger:
-        purchases=paginator.page(1)
+        purchases = paginator.page(1)
     except EmptyPage:
-        purchases=paginator.page(paginator.num_pages)
-    return render(request,'app2/Buyers_purchases_detail.html',{'purchase':purchases,'buyer':buyer})
+        purchases = paginator.page(paginator.num_pages)
+    return render(request, 'app2/Buyers_purchases_detail.html', {'purchases': purchases, 'buyer': buyer})
 
 
 
@@ -2059,22 +2070,57 @@ def user_order_history(request, id=None):
 
 # ======= Notification ==========
 
+
 @login_required
 def notification_list(request):
-    notifications = Notification.objects.all()[ :30]
-    return render(request, 'app2/notification_list.html', {'notifications': notifications})
+    active_tab= request.GET.get('tab','all')
+    user_notification=Notification.objects.all()
+    if  active_tab == 'order':
+        user_notification=Notification.objects.filter(type='order')
+    elif active_tab=="system":
+        user_notification=Notification.objects.filter(type='system')
+    
+    paginator=Paginator(user_notification,8)
+    page_number=request.GET.get('page',1)
+    notifications=paginator.get_page(page_number)
+    
+    context={
+        
+        'notifications':notifications,
+        'active_tab':active_tab,
+    }
+    return render(request, 'app2/notification_list.html', context)
 
+from django.core.files import File
+from django.conf import settings
+import os
 
-# @login_required
-# def notification_add(request):
-#     if request.method == "POST":
-#         message = request.POST.get('message')
-#         status = request.POST.get('status') == "on"
-#         order_number = Notification.objects.count() + 1
-#         Notification.objects.create(user=request.user, message=message, read=status, order_number=order_number)
-#         messages.success(request, "Notification Added Successfully")
-#         return redirect('/notification_list')
-#     return render(request, 'app2/notification_add.html')
+@login_required
+def notification_add(request):
+    if request.method == "POST":
+        print(request.POST)
+        message = request.POST.get("message")
+        read = request.POST.get("read") == "on"
+        image = request.FILES.get("image")
+
+        if not image:
+            default_image = request.POST.get('default_image')
+            if default_image:
+                image = default_image.replace('/media/', '')
+           
+
+        Notification.objects.create(
+            user=request.user,
+            type='system',
+            message=message,
+            image=image,
+            read=read,
+            
+        )
+        return redirect('dashboard:app-notification_list')
+
+    return render(request, 'app2/notification_add.html')
+
 
 @login_required
 def notification_edit(request, id):
@@ -2091,8 +2137,7 @@ def notification_edit(request, id):
 def notification_delete(request, id):
     notification = Notification.objects.get(id=id)
     notification.delete()
-    messages.success(request,"Notification deleted successfully")
+    messages.info(request,"Notification deleted successfully")
     return redirect('/notification_list')
 
 
-    

@@ -32,10 +32,11 @@ class Notification(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=50, choices=TYPE, default='order')
+    image=models.ImageField(upload_to='system_notification_image/',null=True,blank=True)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
-    order_number = models.PositiveIntegerField()
+    order_number = models.PositiveIntegerField(null=True,blank=True)
 
     class Meta:
         ordering = ['-id']
@@ -44,10 +45,23 @@ class Notification(models.Model):
         return f"Notifications of {self.user.name} - {self.message}"
 
 
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+import os
+
+
+@receiver(post_delete, sender=Notification)
+def delete_notification_image(sender, instance, **kwargs):
+    if instance.image:
+        if os.path.isfile(instance.image.path):
+            os.remove(instance.image.path)
+            
+            
 from django.db import models
 from django.utils.timezone import now
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+import math
 
 class Order(models.Model):
     PAYMENT_CHOICES = [('cod', 'Cash on Delivery')]
@@ -72,7 +86,8 @@ class Order(models.Model):
         return f"Order {self.id} - {self.user}"
 
     def get_total_cost(self):
-        return sum([item.get_cost() for item in self.items.all()])
+        cost=sum([item.get_cost() for item in self.items.all()])
+        return int(math.ceil(cost/5.0))*5
 
     def update_stock(self):
         if self.order_status == 'received':

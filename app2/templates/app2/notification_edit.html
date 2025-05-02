@@ -77,6 +77,18 @@
                 <input type="text" id="message" name="message" class="form-control" value="{{ notification.message }}" required>
             </div>
 
+
+            {% if notification.image %}
+            <div class="mb-3">
+                <label for="image" class="form-label">Image (Recommended: 300x300px)</label>
+                <input type="file" id="image" name="image" class="form-control">
+                
+             
+                    <img id="preview" src="{{ notification.image.url }}" width="150" class="mt-2 border rounded" alt="Current Image">
+
+            </div>
+            {% endif %}
+            
             <!-- Using Bootstrap Checkbox -->
             <div class="form-check mb-3 custom-checkbox">
                 <input class="form-check-input" type="checkbox" id="status" name="status" {% if notification.read %}checked{% endif %}>
@@ -90,3 +102,44 @@
 </div>
 
 {% endblock %}
+
+<script>
+    $(document).ready(function() {
+        // Validate before submit
+        $('form').on('submit', function(e) {
+            const message = $('#message').val().trim();
+            const image = $('#image')[0].files[0];
+    
+            if (message.length < 5) {
+                alert('Message must be at least 5 characters long.');
+                e.preventDefault();
+                return;
+            }
+    
+            if (image) {
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!allowedTypes.includes(image.type)) {
+                    alert('Only JPG, JPEG, and PNG formats are allowed.');
+                    e.preventDefault();
+                    return;
+                }
+    
+                const maxSizeMB = 2;
+                if (image.size > maxSizeMB * 1024 * 1024) {
+                    alert('Image size must be less than 2MB.');
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+    
+        // Show preview if image selected
+        $('#image').on('change', function() {
+            const file = this.files[0];
+            if (file) {
+                $('#preview').attr('src', URL.createObjectURL(file));
+            }
+        });
+    });
+    </script>
+    

@@ -21,50 +21,176 @@
                     {% endfor %}
                 </div>
             {% endif %}
+            <a  href ={% url 'dashboard:app-notification_add' %} class=" mb-2 btn btn-success btn-sm">Add Notification</a>
+
+
             
-            {% if notifications %}
-                <div class="card shadow-sm p-3">
-                    <table class="table">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Message</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for notif in notifications %}
-                                <tr class="{% if not notif.read %}unread-notification{% else %}read-notification{% endif %}">
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ notif.message }}</td>
-                                    <td>{{ notif.created_at|date:"d M Y, H:i" }}</td>
-                                    <td>
-                                        {% if notif.read %}
-                                            <span class="badge bg-success">Read</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Unread</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'dashboard:app-notification_edit' notif.id %}" class="text-warning mx-1">
-                                            <i class="fas fa-edit small"></i>
-                                        </a>
-                                        <a href="{% url 'dashboard:app-notification_delete' notif.id %}" class="text-danger mx-1">
-                                            <i class="fas fa-trash small"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- Notification Tabs -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="notificationTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'all' or not active_tab %}active{% endif %}" 
+                               id="all-tab" 
+                               href="{% url 'dashboard:app-notification_list' %}?tab=all&page=1" 
+                               role="tab">
+                                All Notifications
+                                {% if unread_count > 0 %}
+                                <span class="badge bg-danger rounded-pill ms-1">{{ unread_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'order' %}active{% endif %}" 
+                               id="order-tab" 
+                               href="{% url 'dashboard:app-notification_list' %}?tab=order&page=1" 
+                               role="tab">
+                                Order Notifications
+                                {% if order_unread_count > 0 %}
+                                <span class="badge bg-danger rounded-pill ms-1">{{ order_unread_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'system' %}active{% endif %}" 
+                               id="system-tab" 
+                               href="{% url 'dashboard:app-notification_list' %}?tab=system&page=1" 
+                               role="tab">
+                                System Notifications
+                                {% if system_unread_count > 0 %}
+                                <span class="badge bg-danger rounded-pill ms-1">{{ system_unread_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            {% else %}
-                <p class="alert alert-info">No notifications available.</p>
-            {% endif %}
+                
+                <div class="card-body">
+                    {% if notifications %}
+                        <!-- Notification Card Display -->
+                        <div class="row">
+                            {% for notif in notifications %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 {% if not notif.read %}border-left-primary shadow-sm{% else %}border-left-secondary{% endif %}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge {% if notif.type == 'order' %}bg-info{% else %}bg-warning{% endif %}">
+                                                    {{ notif.get_type_display }}
+                                                </span>
+                                                <span class="badge {% if notif.read %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {% if notif.read %}Read{% else %}Unread{% endif %}
+                                                </span>
+                                            </div>
+                                            
+                                            {% if notif.image %}
+                                                <img src="{{ notif.image.url }}" class="img-fluid mb-2" alt="Notification Image">
+                                            {% endif %}
+                                            
+                                            <p class="card-text">{{ notif.message }}</p>
+                                            
+                                            {% if notif.type == 'order' %}
+                                                <p class="small text-muted">Order #{{ notif.order_number }}</p>
+                                            {% endif %}
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">{{ notif.created_at|date:"d M Y, H:i" }}</small>
+                                                <div>
+                                                    <a href="{% url 'dashboard:app-notification_edit' notif.id %}" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'dashboard:app-notification_delete' notif.id %}" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination justify-content-center mt-4">
+                            <nav aria-label="Notification pagination">
+                                <ul class="pagination">
+                                    {% if notifications.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab={{ active_tab }}&page=1" aria-label="First">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab={{ active_tab }}&page={{ notifications.previous_page_number }}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="First">
+                                                <span aria-hidden="true">&laquo;&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for i in notifications.paginator.page_range %}
+                                        {% if notifications.number == i %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ i }}</span>
+                                            </li>
+                                        {% elif i > notifications.number|add:'-3' and i < notifications.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?tab={{ active_tab }}&page={{ i }}">{{ i }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if notifications.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab={{ active_tab }}&page={{ notifications.next_page_number }}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?tab={{ active_tab }}&page={{ notifications.paginator.num_pages }}" aria-label="Last">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Last">
+                                                <span aria-hidden="true">&raquo;&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">No notifications available.</div>
+                    {% endif %}
+                </div>
+            </div>
         </main>
     </div>
 </div>
 
+<style>
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    
+    .border-left-secondary {
+        border-left: 4px solid #858796 !important;
+    }
+</style>
 {% endblock %}

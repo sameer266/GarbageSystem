@@ -1,21 +1,37 @@
 {% extends 'app2/base.html' %}
 {% load static %}
+
 {% block title %} 
 {% if instance %}Edit Product{% else %}Add Product{% endif %}
 {% endblock %}
-{% block body %}
 
+{% block body %}
 <style>
-    #id_rate,#id_product_name ,  #id_unit, #id_price,#id_location,#id_isInstock,#id_rating,#id_vendor,#id_category{
+    #id_rate, #id_product_name ,  #id_unit, #id_price, #id_location, #id_isInstock, #id_rating, #id_vendor, #id_category{
         width: 100%;
         padding: 8px;
         border: 1px solid #ced4da;
         border-radius: 4px;
         box-sizing: border-box;
-      }</style>
-<!-- ============================================================== -->
-<!-- Start Page Content here -->
-<!-- ============================================================== -->
+    }
+    .invalid-feedback {
+        color: red;
+        font-size: 12px;
+    }
+    #imagePreview {
+        max-width: 100%;
+        height: auto;
+    }
+    .file-warning {
+        font-size: 12px;
+        color: #ff6b6b;
+    }
+    .image-dimension-hint {
+        font-size: 12px;
+        color: #5bc0de;
+    }
+</style>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <div class="content-page">
@@ -24,7 +40,6 @@
         <!-- Start Content-->
         <div class="container-fluid">
 
-            <!-- start page title -->
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
@@ -32,7 +47,6 @@
                     </div>
                 </div>
             </div>
-            <!-- end page title -->
                       
             <form method="post" enctype="multipart/form-data" action="{% if instance %}{% url 'dashboard:edit_Product' instance.id %}{% else %}{% url 'dashboard:add_Product' %}{% endif %}">
                 {% csrf_token %}
@@ -51,76 +65,62 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-xl-6">
-                                        <!-- Product Name -->
                                         <div class="mb-3">
                                             <label for="{{ form.product_name.id_for_label }}" class="form-label">Product Name</label>
                                             <input type="text" name="{{ form.product_name.name }}" id="{{ form.product_name.id_for_label }}" class="form-control" required value="{% if instance %}{{ instance.product_name }}{% endif %}" placeholder="Enter product name">
                                         </div>
-                                        <!-- Category -->
-                                    
-                                            
-                                            <div class="mb-3">
-                                                <label class="form-label">Category</label>
-                                                {{ form.category }}
-                                            </div>
-                                            <div class="mb-3">
-
-                                          
-                                            </div> 
-                                            
-                                        <!--Previous Rate -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Category</label>
+                                            {{ form.category }}
+                                        </div>
                                         <div class="mb-3">
                                             <label for="{{ form.previous_rate.id_for_label }}" class="form-label">Previous Rate</label>
                                             {{ form.previous_rate }}
                                         </div>
-                                        
-                                        <!-- Rate -->
                                         <div class="mb-3">
                                             <label for="{{ form.rate.id_for_label }}" class="form-label">Rate</label>
                                             {{ form.rate }}
                                         </div>
                                     </div>
-                                        <div class="col-xl-6">
-
-                                        <!-- Unit -->
+                                    <div class="col-xl-6">
                                         <div class="mb-3">
                                             <label for="{{ form.unit.id_for_label }}" class="form-label">Unit</label>
                                             {{ form.unit }}
                                         </div>
-                                        
                                         <div class="mb-3">
                                             <label for="{{ form.order_number.id_for_label }}" class="form-label">Order Number</label>
                                             {{ form.order_number }}
                                         </div>
-                                        
-                                        
-                                        <!-- Product Image -->
                                         <div class="mb-3 mt-3 mt-xl-0">
                                             <label for="{{ form.product_image.id_for_label }}" class="form-label">Image:</label>
                                             <input type="file" name="{{ form.product_image.name }}" id="{{ form.product_image.id_for_label }}" class="img-fluid form-control custom-class" {% if not instance %}required{% endif %} onchange="showPreview(this);">
                                             <div id="imageContainer" style="width:auto">
                                                 <img id="imagePreview" class="img-fluid" src="{% if instance %}{{ instance.product_image.url }}{% endif %}" alt="">
                                             </div>
+                                            <div class="invalid-feedback" id="imageError"></div>
+                                            <div class="file-warning">
+                                                Recommended image size: Max 5MB, Formats: JPG, JPEG, PNG
+                                            </div>
+                                            <div class="image-dimension-hint">
+                                                Recommended dimensions: 300 x 300 pixels
+                                            </div>
                                         </div>
                                         <br><br>
                                     </div>
-                                      
-                <div class="col-auto">
-                    <a href="{% url 'dashboard:Product' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
-                    {% if instance %}
-                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Update </button>
-                    {% else %}
-                    <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Save</button>
-                    {% endif %}
-                </div>
+                                    <div class="col-auto">
+                                        <a href="{% url 'dashboard:Product' %}" class="btn btn-danger"><i class=""></i>Back to Table</a>
+                                        {% if instance %}
+                                        <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Update</button>
+                                        {% else %}
+                                        <button type="submit" class="btn btn-danger chat-send waves-effect waves-light">Save</button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
-              
-                <br><br><br><br><br><br><br><br><br><br>
+
             </form>
 
         </div>
@@ -128,38 +128,59 @@
 </div>
 
 <script>
-    // Parse the subcategories JSON data passed from the view
-    var subcategoriesData = JSON.parse('{{ subcategories_json|escapejs }}');
-
-    // Function to update the subcategory dropdown based on the selected category
-    function updateSubcategories() {
-        var categorySelect = document.getElementById('id_category');
-        var subcategorySelect = document.getElementById('subcategory');
-
-        var categoryId = categorySelect.value;
-        subcategorySelect.innerHTML = ''; // Clear the existing options
-
-        // Add the options for the selected category
-        if (categoryId in subcategoriesData) {
-            subcategoriesData[categoryId].forEach(function(option) {
-                var opt = document.createElement('option');
-                opt.value = option[0];
-                opt.innerHTML = option[1];
-                subcategorySelect.appendChild(opt);
-            });
-        } else {
-            var opt = document.createElement('option');
-            opt.value = '';
-            opt.innerHTML = '---------';
-            subcategorySelect.appendChild(opt);
-        }
+    function showPreview(input) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('imagePreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 
-    // Call the function initially to populate subcategories based on the initial category value
-    updateSubcategories();
+    // Image validation function
+    $("form").submit(function (e) {
+        var fileInput = $("#id_product_image");
+        var filePath = fileInput.val();
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+        var fileSize = fileInput[0].files[0] ? fileInput[0].files[0].size : 0;
+        var maxSize = 5 * 1024 * 1024; // 5MB
 
-    // Add event listener to update subcategories whenever the category selection changes
-    document.getElementById('id_category').addEventListener('change', updateSubcategories);
+        // Clear previous error message
+        $("#imageError").text("");
+        $(".file-warning").removeClass('text-danger');
+
+        // Check if file is selected and validate
+        if (filePath) {
+            // Check file type
+            if (!allowedExtensions.exec(filePath)) {
+                $("#imageError").text("Please upload a valid image (JPG, JPEG, PNG).");
+                e.preventDefault();
+                return false;
+            }
+            
+            // Check file size
+            if (fileSize > maxSize) {
+                $("#imageError").text("File size should not exceed 5MB.");
+                e.preventDefault();
+                return false;
+            }
+
+            // Check image dimensions (200x200)
+            var img = new Image();
+            img.onload = function () {
+                if (img.width !== 300 || img.height !== 300) {
+                    $("#imageError").text("Image dimensions must be 300 x 300 pixels.");
+                    e.preventDefault();
+                    return false;
+                }
+            };
+            img.src = URL.createObjectURL(fileInput[0].files[0]);
+
+        } else {
+            // If no file is selected
+            $(".file-warning").addClass('text-danger');
+        }
+    });
 </script>
-    
+
 {% endblock %}

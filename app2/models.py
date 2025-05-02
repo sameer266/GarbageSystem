@@ -37,7 +37,7 @@ class Buyer(models.Model):
     phoneNo=models.CharField(max_length=20)
 
 class Purchase(models.Model):
-    buyer=models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    buyer=models.ForeignKey(Buyer, on_delete=models.SET_NULL,null=True)
     product=models.CharField(max_length=200)
     quantity=models.PositiveIntegerField()
     price=models.DecimalField(max_digits=10, decimal_places=2)
